@@ -1,0 +1,2328 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="訓練三軌追蹤" />
+  <meta name="theme-color" content="#1e293b" />
+  <title>每週訓練菜單與三軌追蹤系統（2026/11/16 – 2026/11/22）</title>
+  <style>
+    :root {
+      --navy-900: #0f172a;
+      --navy-800: #1e293b;
+      --navy-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-300: #cbd5e1;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --teal-700: #0f766e;
+      --teal-600: #0d9488;
+      --teal-100: #ccfbf1;
+      --teal-50: #f0fdfa;
+      --sky-700: #0369a1;
+      --sky-200: #bae6fd;
+      --sky-50: #eff6ff;
+      --rose-700: #be123c;
+      --rose-200: #fecdd3;
+      --rose-50: #fff1f2;
+      --violet-700: #6d28d9;
+      --violet-200: #ddd6fe;
+      --violet-50: #f5f3ff;
+      --amber-800: #92400e;
+      --amber-200: #fde68a;
+      --amber-50: #fffbeb;
+      --green-800: #166534;
+      --green-100: #dcfce7;
+      --red-700: #b91c1c;
+      --red-100: #fee2e2;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 7px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+      background-color: var(--slate-100);
+      color: var(--navy-900);
+      line-height: 1.5;
+      padding-bottom: 48px;
+    }
+
+    /* Header */
+    .app-header {
+      background: linear-gradient(135deg, var(--navy-900) 0%, var(--navy-800) 100%);
+      color: #ffffff;
+      padding: 16px 16px 12px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.2);
+    }
+
+    .header-top {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .app-title {
+      margin: 0;
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .app-subtitle {
+      margin: 2px 0 0;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+    }
+
+    .save-indicator {
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      padding: 4px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    /* Main Nav Tabs */
+    .nav-tabs {
+      max-width: 960px;
+      margin: 12px auto 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .nav-tab {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      padding: 9px 6px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .nav-tab.active {
+      background: #ffffff;
+      color: var(--navy-900);
+      border-color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 14px 12px;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Day Strip */
+    .day-strip {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(76px, 1fr));
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+    }
+
+    .day-pill {
+      background: #ffffff;
+      border: 1.5px solid var(--slate-200);
+      border-radius: var(--radius-md);
+      padding: 8px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      min-width: 76px;
+    }
+
+    .day-pill.active {
+      background: var(--navy-800);
+      border-color: var(--navy-800);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .day-pill .wk {
+      font-size: 0.88rem;
+      font-weight: 700;
+      display: block;
+    }
+
+    .day-pill .dt {
+      font-size: 0.72rem;
+      opacity: 0.8;
+      display: block;
+      margin-top: 1px;
+    }
+
+    .day-pill .tag {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 0.68rem;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: var(--slate-100);
+      color: var(--slate-600);
+      font-weight: 600;
+    }
+
+    .day-pill.active .tag {
+      background: rgba(255, 255, 255, 0.18);
+      color: #f8fafc;
+    }
+
+    /* Day Summary Banner */
+    .day-summary-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      border: 1px solid var(--slate-200);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .day-module-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--navy-900);
+      margin: 0 0 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .completion-pill {
+      font-size: 0.8rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--teal-50);
+      color: var(--teal-700);
+      border: 1px solid var(--teal-100);
+      font-weight: 700;
+    }
+
+    .track-mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .track-mini-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .mini-box {
+      padding: 9px 11px;
+      border-radius: var(--radius-md);
+      font-size: 0.82rem;
+    }
+
+    .mini-box.strength {
+      background: var(--teal-50);
+      border: 1px solid var(--teal-100);
+      color: var(--teal-700);
+    }
+
+    .mini-box.walk {
+      background: var(--sky-50);
+      border: 1px solid var(--sky-200);
+      color: var(--sky-700);
+    }
+
+    .mini-box.cardio {
+      background: var(--rose-50);
+      border: 1px solid var(--rose-200);
+      color: var(--rose-700);
+    }
+
+    .mini-box .lbl {
+      font-size: 0.73rem;
+      font-weight: 600;
+      opacity: 0.88;
+      display: block;
+    }
+
+    .mini-box .val {
+      font-size: 0.96rem;
+      font-weight: 700;
+      margin-top: 2px;
+      display: block;
+    }
+
+    /* Section Headers inside Day View */
+    .track-section-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 18px 0 8px;
+      padding: 7px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .track-section-hdr.walk-hdr {
+      background: var(--sky-50);
+      color: var(--sky-700);
+      border-left: 4px solid var(--sky-700);
+    }
+
+    .track-section-hdr.strength-hdr {
+      background: var(--slate-200);
+      color: var(--navy-800);
+      border-left: 4px solid var(--navy-800);
+    }
+
+    .track-section-hdr.custom-hdr {
+      background: var(--violet-50);
+      color: var(--violet-700);
+      border-left: 4px solid var(--violet-700);
+    }
+
+    .track-section-hdr.cardio-hdr {
+      background: var(--rose-50);
+      color: var(--rose-700);
+      border-left: 4px solid var(--rose-700);
+    }
+
+    /* Exercise & Track Cards */
+    .ex-card {
+      background: #ffffff;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      margin-bottom: 10px;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.15s ease;
+    }
+
+    .ex-card.status-done {
+      border-left: 5px solid var(--teal-600);
+    }
+
+    .ex-card.status-skip {
+      border-left: 5px solid #d97706;
+      opacity: 0.85;
+    }
+
+    .ex-card.walk-card {
+      background: #fafdff;
+      border-color: var(--sky-200);
+    }
+
+    .ex-card.cardio-card {
+      background: #fff9fa;
+      border-color: var(--rose-200);
+    }
+
+    .ex-card.custom-card {
+      background: #fcfaff;
+      border-color: var(--violet-200);
+    }
+
+    .card-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .phase-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--slate-100);
+      color: var(--slate-600);
+      margin-bottom: 4px;
+    }
+
+    .phase-badge.walk {
+      background: var(--sky-50);
+      color: var(--sky-700);
+      border: 1px solid var(--sky-200);
+    }
+
+    .phase-badge.cardio {
+      background: var(--rose-50);
+      color: var(--rose-700);
+      border: 1px solid var(--rose-200);
+    }
+
+    .phase-badge.custom {
+      background: var(--violet-50);
+      color: var(--violet-700);
+      border: 1px solid var(--violet-200);
+    }
+
+    .ex-name {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy-900);
+    }
+
+    .status-select {
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--slate-300);
+      font-size: 0.84rem;
+      font-weight: 700;
+      background: #ffffff;
+      color: var(--navy-900);
+      cursor: pointer;
+      min-height: 38px;
+    }
+
+    .status-select.done {
+      background: var(--green-100);
+      border-color: #86efac;
+      color: var(--green-800);
+    }
+
+    .status-select.skip {
+      background: var(--amber-50);
+      border-color: var(--amber-200);
+      color: var(--amber-800);
+    }
+
+    .status-select.none {
+      background: var(--slate-100);
+      border-color: var(--slate-300);
+      color: var(--slate-600);
+    }
+
+    .meta-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .meta-chip {
+      font-size: 0.76rem;
+      background: var(--slate-100);
+      color: var(--navy-700);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .cue-box {
+      font-size: 0.82rem;
+      color: var(--slate-600);
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      margin-bottom: 10px;
+    }
+
+    .cue-box strong {
+      color: var(--navy-800);
+    }
+
+    .yt-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--sky-700);
+      text-decoration: none;
+      background: var(--sky-50);
+      border: 1px solid var(--sky-200);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    /* Form Controls */
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+      gap: 8px;
+      align-items: end;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .field-group label {
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: var(--slate-600);
+    }
+
+    .ctrl-input, .ctrl-select, .ctrl-textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1.5px solid var(--slate-300);
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      font-family: inherit;
+      background: var(--amber-50);
+      color: var(--navy-900);
+      min-height: 40px;
+    }
+
+    .walk-card .ctrl-input {
+      background: var(--sky-50);
+      border-color: var(--sky-200);
+    }
+
+    .cardio-card .ctrl-input, .cardio-card .ctrl-select {
+      background: var(--rose-50);
+      border-color: var(--rose-200);
+    }
+
+    .ctrl-input:focus, .ctrl-select:focus, .ctrl-textarea:focus {
+      outline: none;
+      border-color: var(--teal-600);
+      background: #ffffff;
+    }
+
+    .weight-unit-row {
+      display: flex;
+      gap: 4px;
+    }
+
+    .unit-btn {
+      padding: 0 10px;
+      border: 1.5px solid var(--slate-300);
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--navy-800);
+      cursor: pointer;
+      min-height: 40px;
+      min-width: 48px;
+    }
+
+    .unit-btn.lb {
+      background: #dbeafe;
+      border-color: #93c5fd;
+      color: #1e40af;
+    }
+
+    .calc-strip {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--teal-50);
+      border: 1px solid var(--teal-100);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.84rem;
+      color: var(--teal-700);
+      font-weight: 700;
+    }
+
+    .calc-strip.walk-calc {
+      background: var(--sky-50);
+      border-color: var(--sky-200);
+      color: var(--sky-700);
+    }
+
+    .calc-strip.cardio-calc {
+      background: var(--rose-50);
+      border-color: var(--rose-200);
+      color: var(--rose-700);
+    }
+
+    .warn-banner {
+      margin-top: 8px;
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      background: var(--red-100);
+      color: var(--red-700);
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid #fecaca;
+    }
+
+    .preset-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .preset-pill {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--rose-200);
+      background: #ffffff;
+      color: var(--rose-700);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .preset-pill:active {
+      background: var(--rose-50);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid transparent;
+      font-size: 0.86rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      min-height: 40px;
+    }
+
+    .btn-primary {
+      background: var(--navy-800);
+      color: #ffffff;
+    }
+
+    .btn-teal {
+      background: var(--teal-700);
+      color: #ffffff;
+    }
+
+    .btn-outline {
+      background: #ffffff;
+      border-color: var(--slate-300);
+      color: var(--navy-800);
+    }
+
+    .btn-danger {
+      background: #ffffff;
+      border-color: #fecaca;
+      color: var(--red-700);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      min-height: 32px;
+    }
+
+    /* Overview & Charts */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .kpi-card {
+      background: #ffffff;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .kpi-card .k-title {
+      font-size: 0.78rem;
+      color: var(--slate-600);
+      font-weight: 700;
+    }
+
+    .kpi-card .k-val {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--navy-900);
+      margin: 4px 0 2px;
+    }
+
+    .kpi-card .k-sub {
+      font-size: 0.75rem;
+      color: var(--slate-500);
+    }
+
+    .panel-card {
+      background: #ffffff;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
+      padding: 15px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .panel-title {
+      margin: 0 0 12px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--navy-900);
+      border-bottom: 1px solid var(--slate-200);
+      padding-bottom: 8px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 74px 1fr 96px;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+    }
+
+    .bar-track {
+      height: 16px;
+      background: var(--slate-100);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .bar-fill.teal { background: var(--teal-600); }
+    .bar-fill.sky { background: var(--sky-700); }
+    .bar-fill.rose { background: var(--rose-700); }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table.summary-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      min-width: 680px;
+    }
+
+    table.summary-tbl th {
+      background: var(--navy-700);
+      color: #ffffff;
+      padding: 8px 6px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    table.summary-tbl td {
+      padding: 8px 6px;
+      border-bottom: 1px solid var(--slate-200);
+      text-align: center;
+    }
+
+    table.summary-tbl tr:nth-child(even) td {
+      background: var(--slate-50);
+    }
+
+    /* Machine Library */
+    .star-row {
+      display: flex;
+      gap: 4px;
+    }
+
+    .star-btn {
+      font-size: 1.3rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px 4px;
+      color: var(--slate-300);
+    }
+
+    .star-btn.active {
+      color: #f59e0b;
+    }
+
+    .machine-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .machine-item {
+      background: #ffffff;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .machine-thumb {
+      width: 100%;
+      height: 165px;
+      object-fit: cover;
+      background: var(--slate-100);
+      cursor: zoom-in;
+    }
+
+    .machine-body {
+      padding: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .code-box {
+      background: var(--navy-900);
+      color: #e2e8f0;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.76rem;
+      max-height: 240px;
+      overflow: auto;
+      white-space: pre;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.82);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-img {
+      max-width: 100%;
+      max-height: 86vh;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--navy-900);
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      z-index: 120;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25);
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-top">
+      <div>
+        <h1 class="app-title">每週訓練菜單與三軌追蹤系統</h1>
+        <p class="app-subtitle">2026/11/16（週一）– 2026/11/22（週日）｜重訓 × 散步 × 有氧 × 器械庫</p>
+      </div>
+      <span class="save-indicator" id="saveStatus">本機已儲存</span>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="tab-schedule">📋 每日課表</button>
+      <button class="nav-tab" data-tab="tab-machines">📸 器械收藏庫</button>
+      <button class="nav-tab" data-tab="tab-overview">📊 總覽統計</button>
+      <button class="nav-tab" data-tab="tab-sync">☁️ 雲端同步</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- TAB 1: DAILY SCHEDULE -->
+    <section id="tab-schedule" class="tab-panel active">
+      <div class="day-strip" id="dayStrip"></div>
+      <div class="day-summary-card" id="daySummaryCard"></div>
+      <div id="scheduleContainer"></div>
+    </section>
+
+    <!-- TAB 2: MACHINE LIBRARY -->
+    <section id="tab-machines" class="tab-panel">
+      <div class="panel-card">
+        <h2 class="panel-title" id="machineFormTitle">📸 新增感受良好的健身房器械（拍照登錄供日後排課）</h2>
+        <div class="input-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));">
+          <div class="field-group">
+            <label>器材名稱 / 品牌 *</label>
+            <input type="text" id="mName" class="ctrl-input" placeholder="例：鐘擺深蹲機 / Matrix 坐姿推胸" />
+          </div>
+          <div class="field-group">
+            <label>歸類訓練日 / 動作模式</label>
+            <select id="mCategory" class="ctrl-select">
+              <option value="週一｜拉日（背/二頭）">週一｜拉日（背/二頭）</option>
+              <option value="週二｜腿日（股四頭/臀腿）">週二｜腿日（股四頭/臀腿）</option>
+              <option value="週四｜推日（胸/肩/三頭）">週四｜推日（胸/肩/三頭）</option>
+              <option value="有氧與其他">有氧與其他</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>發力感受評分</label>
+            <div class="star-row" id="mStarRow"></div>
+          </div>
+        </div>
+
+        <div class="input-grid" style="margin-top:10px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));">
+          <div class="field-group">
+            <label>座椅 / 靠墊 / 握距調整參數</label>
+            <input type="text" id="mSetup" class="ctrl-input" placeholder="例：椅墊第 4 格、胸墊第 2 格、寬握把" />
+          </div>
+          <div class="field-group">
+            <label>器材拍照 / 上傳照片（自動壓縮省空間）</label>
+            <input type="file" id="mPhotoInput" accept="image/*" capture="environment" class="ctrl-input" style="padding:6px;" />
+          </div>
+        </div>
+
+        <div id="mPhotoPreviewWrap" style="margin-top:8px; display:none; align-items:center; gap:10px;">
+          <img id="mPhotoPreview" src="" alt="預覽" style="width:84px; height:84px; object-fit:cover; border-radius:8px; border:1px solid #cbd5e1;" />
+          <button type="button" class="btn btn-danger btn-sm" id="mClearPhotoBtn">移除照片</button>
+        </div>
+
+        <div class="field-group" style="margin-top:10px;">
+          <label>發力感受與體態筆記（肋骨下沉、是否代償下背等）</label>
+          <textarea id="mNotes" rows="2" class="ctrl-textarea" placeholder="例：胸墊頂住後完全不會借用下背，闊背肌收縮感非常集中。"></textarea>
+        </div>
+
+        <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between;">
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn btn-teal" id="mSaveBtn">💾 儲存至器械收藏庫</button>
+            <button type="button" class="btn btn-outline" id="mCancelEditBtn" style="display:none;">取消編輯</button>
+          </div>
+          <button type="button" class="btn btn-primary" id="copyMachinesBtn">📋 一鍵複製給教練排課</button>
+        </div>
+      </div>
+
+      <div class="preset-pills" id="machineFilterRow"></div>
+      <div class="machine-grid" id="machineListContainer"></div>
+    </section>
+
+    <!-- TAB 3: OVERVIEW & CHARTS -->
+    <section id="tab-overview" class="tab-panel">
+      <div class="kpi-grid" id="overviewKpiGrid"></div>
+
+      <div class="panel-card">
+        <h2 class="panel-title">圖表 A｜每日重訓總容量 Volume（kg）分布</h2>
+        <div id="chartStrength"></div>
+      </div>
+
+      <div class="panel-card">
+        <h2 class="panel-title">圖表 B｜每日午間散步 NEAT 距離（km）與均速</h2>
+        <div id="chartWalk"></div>
+      </div>
+
+      <div class="panel-card">
+        <h2 class="panel-title">圖表 C｜每日專項有氧距離（km）與時長／坡度</h2>
+        <div id="chartCardio"></div>
+      </div>
+
+      <div class="panel-card">
+        <h2 class="panel-title">全週 7 日三軌數據彙總表</h2>
+        <div class="table-wrap" id="overviewTableWrap"></div>
+      </div>
+
+      <div class="panel-card">
+        <h2 class="panel-title">力學矯正與三軌計量檢核重點</h2>
+        <ul style="margin:0; padding-left:18px; font-size:0.84rem; color:#334155; display:flex; flex-direction:column; gap:6px;">
+          <li><strong>純空槓計量規則：</strong>使用 20 kg 空槓臥推或深蹲時，計量基準選「總重 (含槓/機重)」、空槓重填 <code>20</code>、外加重量務必填 <code>0</code>（不可留白），系統即會納入 20 kg 計算總容量。</li>
+          <li><strong>壺鈴農夫走路（HARCO 比賽專項）：</strong>雙手各提一顆壺鈴時，填入「單顆壺鈴重量」並選「單支啞鈴 (×2)」，系統自動乘以 2 顆計入有效負重。</li>
+          <li><strong>午間散步控速鐵律：</strong>週三（腿後 DOMS 高峰）與週五（晚間羽球日）午間散步時速請控制在 <code>≤ 4.5 km/h</code>，純促進下肢血液回流而不消耗肌醣原。</li>
+          <li><strong>專項有氧與體態保護：</strong>有氧預設「➖ 今日無有氧」不扣分；執行跑步機爬坡（坡度 ≥ 8%）時嚴禁雙手死抓扶手身體後仰，維持肋骨下沉與骨盆中立。</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- TAB 4: GOOGLE CLOUD SYNC & BACKUP -->
+    <section id="tab-sync" class="tab-panel">
+      <div class="panel-card">
+        <h2 class="panel-title">☁️ Google 試算表雙向同步設定（69 列 × 28 欄 A–AB）</h2>
+        <p style="font-size:0.83rem; color:#475569; margin-top:0;">
+          綁定 Google Apps Script 網頁應用程式網址後，可將全週課表（69 列 × 28 欄）與「器械感受收藏庫」雙向同步至你的 Google 試算表。
+        </p>
+        <div class="field-group">
+          <label>Google Apps Script 部署網址（Web App URL）</label>
+          <input type="url" id="gasUrlInput" class="ctrl-input" placeholder="https://script.google.com/macros/s/xxxxx/exec" />
+        </div>
+        <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
+          <button type="button" class="btn btn-primary" id="saveGasUrlBtn">儲存網址</button>
+          <button type="button" class="btn btn-teal" id="pushCloudBtn">⬆️ 上傳同步至試算表</button>
+          <button type="button" class="btn btn-outline" id="pullCloudBtn">⬇️ 從試算表載入覆蓋</button>
+        </div>
+        <p id="syncStatusMsg" style="font-size:0.8rem; color:#0f766e; font-weight:700; margin:8px 0 0;"></p>
+      </div>
+
+      <div class="panel-card">
+        <h2 class="panel-title">💾 本機備份與匯出（CSV / JSON）</h2>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <button type="button" class="btn btn-outline" id="exportCsvBtn">📥 匯出課表 CSV（含 UTF-8 BOM）</button>
+          <button type="button" class="btn btn-outline" id="exportJsonBtn">📦 匯出完整 JSON 備份</button>
+          <label class="btn btn-outline" style="cursor:pointer;">
+            📂 匯入 JSON 還原
+            <input type="file" id="importJsonInput" accept=".json" style="display:none;" />
+          </label>
+          <button type="button" class="btn btn-danger" id="resetAllBtn">⚠️ 重設本週輸入數值</button>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <h2 class="panel-title">📜 Google Apps Script 後端程式碼（Code.gs）</h2>
+        <p style="font-size:0.8rem; color:#475569; margin-top:0;">
+          在 Google 試算表點擊「擴充功能 → Apps Script」，貼上以下程式碼並部署為「網頁應用程式（誰可以存取：所有人）」即可使用：
+        </p>
+        <button type="button" class="btn btn-primary btn-sm" id="copyGasCodeBtn" style="margin-bottom:8px;">📋 複製 Apps Script 程式碼</button>
+        <pre class="code-box" id="gasCodeBlock"></pre>
+      </div>
+    </section>
+  </main>
+
+  <!-- Image Lightbox Modal -->
+  <div class="modal-backdrop" id="imgModal">
+    <img src="" alt="器材放大檢視" class="modal-img" id="modalImgEl" />
+  </div>
+
+  <div class="toast" id="toastEl"></div>
+
+  <script>
+    const STORAGE_KEY_ITEMS = "workout_tracker_20261116_v7_items";
+    const STORAGE_KEY_MACHINES = "workout_tracker_20261116_v7_machines";
+    const STORAGE_KEY_GAS = "workout_tracker_20261116_v7_gas_url";
+
+    const DAYS_META = [
+      { date: "2026/11/16", weekday: "週一", shortTag: "拉日", module: "拉日（背＋二頭＋農夫走路）", cardioCue: "可選填 15–25 分鐘中低強度爬坡或慢跑；維持肋骨下沉不扶握把塌腰。" },
+      { date: "2026/11/17", weekday: "週二", shortTag: "腿日", module: "腿日（股四頭強化＋後鏈）", cardioCue: "腿日下肢負荷高，建議不排有氧；若執行僅限 10–15 分鐘低坡度緩和。" },
+      { date: "2026/11/18", weekday: "週三", shortTag: "恢復", module: "動態恢復與體態微調", cardioCue: "腿後 DOMS 高峰，避免陡坡(>8%)與高衝擊跑步，以免牽拉小腿與阿基里斯腱。" },
+      { date: "2026/11/19", weekday: "週四", shortTag: "推日", module: "推日（胸＋肩＋三頭＋機械核心）", cardioCue: "適合安排 20–30 分鐘跑步機爬坡（坡度 6–10%、速度 4.5–5.5 km/h）或慢跑。" },
+      { date: "2026/11/20", weekday: "週五", shortTag: "羽球", module: "羽球專項（晚間）", cardioCue: "晚間有羽球專項，白天建議「➖ 今日無有氧」保留下肢肌醣原。" },
+      { date: "2026/11/21", weekday: "週六", shortTag: "修復", module: "主動恢復與系統修復", cardioCue: "可依體感選填輕鬆慢跑或低坡度有氧促進心肺循環；無執行維持「➖ 今日無有氧」。" },
+      { date: "2026/11/22", weekday: "週日", shortTag: "修復", module: "主動恢復與系統修復", cardioCue: "可依體感選填輕鬆有氧或純伸展休息；無執行維持「➖ 今日無有氧」不扣分。" }
+    ];
+
+    const RAW_BASE_ITEMS = [
+      // 週一 2026/11/16
+      { date: "2026/11/16", rowType: "walk", phase: "午間散步 (NEAT)", name: "午間日常散步", basis: "步行紀錄 (KM/分)", baseKg: 0, targetSets: 0, targetReps: "30–45 分鐘 (約 3–4 km)", rest: "-", rpe: "正常步速 4.8–5.5 km/h", cues: "填寫距離(km)與時長(分鐘)，系統自動換算平均時速並獨立累計至總覽。維持挺胸擺臂、肋骨不外翻。", muscles: "日常活動消耗 (NEAT)、下肢循環", video: "http://www.youtube.com/watch?v=drObrz2eerA" },
+      { date: "2026/11/16", rowType: "strength", phase: "動態熱身", name: "貓牛式脊椎延展", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 2, targetReps: "8–10 次", rest: "30 秒", rpe: "自重", cues: "四足跪姿，吸氣沉腹延展前側，吐氣推地圓背推開肩胛，逐節活動胸腰椎。", muscles: "豎脊肌動態伸展、胸椎活動度", video: "http://www.youtube.com/watch?v=xosugVQ9uL4" },
+      { date: "2026/11/16", rowType: "strength", phase: "主課表 1", name: "寬握高位下拉 (Lat Pulldown)", basis: "總重 (含槓/機重)", baseKg: 0, targetSets: 4, targetReps: "10–12 下", rest: "90 秒", rpe: "RPE 7.5–8", cues: "直接填插銷數字（若為磅數請點單位切 LB）。胸口微挺、肋骨下沉不後仰借力，手肘垂直向下拉至鎖骨高度。", muscles: "闊背肌、大圓肌、中下斜方肌", video: "http://www.youtube.com/watch?v=9kDT2RJSnyE" },
+      { date: "2026/11/16", rowType: "strength", phase: "主課表 2", name: "坐姿機械划船 (Seated Row)", basis: "總重 (含槓/機重)", baseKg: 0, targetSets: 4, targetReps: "10–12 下", rest: "90 秒", rpe: "RPE 7.5–8", cues: "胸墊頂住胸口避免腰椎代償，肩胛骨先後收再將把手拉向腹部，頂峰停頓 1 秒。", muscles: "闊背肌中下段、菱形肌、中斜方肌", video: "http://www.youtube.com/watch?v=N4E8CdeVNUM" },
+      { date: "2026/11/16", rowType: "strength", phase: "主課表 3", name: "支撐單臂啞鈴划船 (Single-Arm DB Row)", basis: "單邊計重 (×2)", baseKg: 0, targetSets: 3, targetReps: "10 下/側", rest: "60 秒", rpe: "中重重量", cues: "填單手拿的啞鈴重量（系統自動×2側計算總容量）。一手一膝支撐平椅，弱側先做，強側次數嚴格看齊弱側。", muscles: "闊背肌（單側孤立）、大圓肌、菱形肌", video: "http://www.youtube.com/watch?v=c1ZbNsx1iAQ" },
+      { date: "2026/11/16", rowType: "strength", phase: "主課表 4", name: "蝴蝶機反向飛鳥 (Reverse Pec Deck)", basis: "總重 (含槓/機重)", baseKg: 0, targetSets: 3, targetReps: "12–15 下", rest: "60 秒", rpe: "輕中重量 (RPE 8)", cues: "坐姿胸貼靠墊固定胸廓，沉肩不聳肩，手肘微屈向後打開強化上背、改善含胸駝背。", muscles: "三角肌後束、菱形肌、中下斜方肌", video: "http://www.youtube.com/watch?v=68GpNxTHRY4" },
+      { date: "2026/11/16", rowType: "strength", phase: "主課表 5", name: "站姿啞鈴或槓鈴彎舉", basis: "單支啞鈴 (×2)", baseKg: 0, targetSets: 3, targetReps: "10–12 下", rest: "60 秒", rpe: "中等重量 (RPE 8)", cues: "用啞鈴填單支重（系統自動×2支）；若改用W槓/直槓，請將計量基準改選「總重」並填空槓重。大臂夾緊身體兩側。", muscles: "肱二頭肌、肱肌、前臂屈肌群", video: "http://www.youtube.com/watch?v=igppHAAIdT4" },
+      { date: "2026/11/16", rowType: "strength", phase: "比賽專項保留", name: "壺鈴農夫走路（雙手／單手）", basis: "單支啞鈴 (×2)", baseKg: 0, targetSets: 4, targetReps: "30–45 秒 (或定距)", rest: "60 秒", rpe: "中高負重壺鈴", cues: "HARCO 比賽專項：雙手各提一顆壺鈴時填「單顆壺鈴重量」（系統自動×2顆）；單手抗側屈則選「單邊計重 (×2)」。肋骨下沉快步穩走。", muscles: "前臂握力、深層核心抗側屈、中上斜方肌", video: "http://www.youtube.com/watch?v=tEl9JOKq1co" },
+
+      // 週二 2026/11/17
+      { date: "2026/11/17", rowType: "walk", phase: "午間散步 (NEAT)", name: "午間日常散步", basis: "步行紀錄 (KM/分)", baseKg: 0, targetSets: 0, targetReps: "30–40 分鐘 (約 2.5–3.5 km)", rest: "-", rpe: "輕鬆步速 4.5–5.0 km/h", cues: "晚間有大重量腿日，午間散步維持輕鬆步速即可，保留股四頭肌醣原儲備。", muscles: "日常活動消耗 (NEAT)、下肢暖機", video: "http://www.youtube.com/watch?v=drObrz2eerA" },
+      { date: "2026/11/17", rowType: "strength", phase: "動態熱身 1", name: "踝關節背屈膝碰牆", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 2, targetReps: "10–12 次/側", rest: "30 秒", rpe: "自重", cues: "腳跟貼地不離地，膝蓋朝第二腳趾前推碰牆，增加踝背屈活動度。", muscles: "踝關節活動度、比目魚肌伸展", video: "http://www.youtube.com/watch?v=0c19kYDYjqw" },
+      { date: "2026/11/17", rowType: "strength", phase: "動態熱身 2", name: "世界最偉大伸展", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 1, targetReps: "5 次/側", rest: "30 秒", rpe: "自重", cues: "深弓箭步手肘下沉碰地後向上轉胸，打開髖前側與胸椎活動度。", muscles: "髂腰肌、股直肌、胸椎旋轉肌群", video: "http://www.youtube.com/watch?v=c1znbKp3HPA" },
+      { date: "2026/11/17", rowType: "strength", phase: "核心啟動", name: "360度呼吸 ＋ 死蟲式", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 2, targetReps: "左右各 8 下", rest: "45 秒", rpe: "自重", cues: "肋骨下沉，腰圍 360 度吸氣撐開建立腹壓，對角手腳延伸且下背不離地。", muscles: "深層腹橫肌、骨盆抗伸展穩定度", video: "http://www.youtube.com/watch?v=M9aaKRo7O2Q" },
+      { date: "2026/11/17", rowType: "strength", phase: "主課表 1", name: "背槓深蹲（踩深蹲斜板）或 機械哈克深蹲", basis: "總重 (含槓/機重)", baseKg: 20, targetSets: 4, targetReps: "6–8 下 (不含熱身2組)", rest: "90–120 秒", rpe: "RPE 7–7.5", cues: "預設空槓/哈克空機重 20kg，外加重量填兩側槓片總和（純空槓請填 0）。背槓踩斜板＋硬底鞋；哈克臀背貼死靠墊。", muscles: "股四頭肌（強化重點）、臀大肌", video: "http://www.youtube.com/watch?v=mkptd8ZLpsw" },
+      { date: "2026/11/17", rowType: "strength", phase: "主課表 2", name: "45度機械斜板腿推 (Leg Press)", basis: "總重 (含槓/機重)", baseKg: 0, targetSets: 3, targetReps: "10–12 下", rest: "75–90 秒", rpe: "RPE 8", cues: "外加重量填兩側槓片總和（若計入空滑車重約 35–45kg 可填於空槓重欄）。雙腳踩踏板中央，骨盆緊貼椅墊不捲起。", muscles: "股四頭肌、大腿內收肌群、臀大肌", video: "http://www.youtube.com/watch?v=B_vREb5xkek" },
+      { date: "2026/11/17", rowType: "strength", phase: "主課表 3", name: "機械坐姿腿屈伸 (Leg Extension)", basis: "總重 (含槓/機重)", baseKg: 0, targetSets: 3, targetReps: "12–15 下", rest: "60–75 秒", rpe: "RPE 8", cues: "直接填插銷配重數字（磅數機台請點單位切 LB）。背貼實靠墊，頂峰停頓 1 秒。", muscles: "股四頭肌（股直肌、內/外側肌）", video: "http://www.youtube.com/watch?v=4xbMYlzv7as" },
+      { date: "2026/11/17", rowType: "strength", phase: "主課表 4", name: "專用臀推機 (Hip Thrust Machine)", basis: "總重 (含槓/機重)", baseKg: 0, targetSets: 4, targetReps: "10–12 下", rest: "75 秒", rpe: "RPE 8", cues: "填兩側槓片總重或插銷數字（可選 KG 或 LB）。眼睛看正前方、肋骨鎖死，頂峰強制夾緊臀部 1–2 秒。", muscles: "臀大肌（向心爆發力）", video: "http://www.youtube.com/watch?v=-N0d8BJLWOk" },
+      { date: "2026/11/17", rowType: "strength", phase: "主課表 5", name: "啞鈴羅馬尼亞硬舉 (Dumbbell RDL)", basis: "單支啞鈴 (×2)", baseKg: 0, targetSets: 3, targetReps: "10 下", rest: "60–75 秒", rpe: "RPE 7.5", cues: "填「單支啞鈴」重量（系統自動×2支）。膝微屈角度固定，純靠臀部向後推形成髖鉸鏈，拉伸大腿後側。", muscles: "腿後腱（膕繩肌）、臀大肌下緣", video: "http://www.youtube.com/watch?v=ULAiQO2KC38" },
+      { date: "2026/11/17", rowType: "strength", phase: "主課表 6", name: "機械坐姿腿後勾 (Seated Leg Curl)", basis: "總重 (含槓/機重)", baseKg: 0, targetSets: 3, targetReps: "12–15 下", rest: "60 秒", rpe: "RPE 8", cues: "直接填插銷數字（磅數選 LB）。軀幹貼實靠背，向心快速勾起、離心慢放 2 秒。", muscles: "腿後腱（膝屈減速肌力）", video: "http://www.youtube.com/watch?v=6cdIy7n8XcY" },
+      { date: "2026/11/17", rowType: "strength", phase: "主課表 7", name: "機械坐姿髖外展 (Hip Abduction)", basis: "總重 (含槓/機重)", baseKg: 0, targetSets: 3, targetReps: "15 下", rest: "60 秒", rpe: "RPE 8", cues: "插銷機台填配重數字（用彈力帶則基準選「自重 / 彈力帶」）。上背貼實椅背不前傾借力，強化臀中肌。", muscles: "臀中肌、臀小肌", video: "http://www.youtube.com/watch?v=_lF1L6FabNE" },
+      { date: "2026/11/17", rowType: "strength", phase: "訓後放鬆", name: "滾筒筋膜放鬆", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 1, targetReps: "5–8 分鐘", rest: "-", rpe: "自重放鬆", cues: "慢速滾壓股四頭肌、大腿外側、臀大肌與小腿（嚴禁滾壓下背腰椎）。", muscles: "下肢深層筋膜放鬆與血液回流", video: "http://www.youtube.com/watch?v=uXpdA-yzAzs" },
+
+      // 週三 2026/11/18
+      { date: "2026/11/18", rowType: "walk", phase: "午間散步 (NEAT)", name: "午間慢速修復散步", basis: "步行紀錄 (KM/分)", baseKg: 0, targetSets: 0, targetReps: "25–35 分鐘 (約 1.8–2.5 km)", rest: "-", rpe: "慢速修復 ≤ 4.5 km/h", cues: "【關鍵控速】腿後 DOMS 高峰期，平均時速請控制在 4.5 km/h 以下，藉小腿幫浦促進靜脈回流，嚴禁快走。", muscles: "下肢血液循環、DOMS 代謝排除", video: "http://www.youtube.com/watch?v=drObrz2eerA" },
+      { date: "2026/11/18", rowType: "strength", phase: "活動度微調 1", name: "靠牆站姿胸椎旋轉開胸", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 2, targetReps: "8–10 次/側", rest: "30 秒", rpe: "自重", cues: "內側髖貼牆、骨盆正對前方不動，外側手帶動胸口與視線向後畫大圓展開。", muscles: "胸椎旋轉活動度、胸大肌伸展", video: "http://www.youtube.com/watch?v=jekiwEfxwA0" },
+      { date: "2026/11/18", rowType: "strength", phase: "活動度微調 2", name: "踝關節背屈膝碰牆", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 2, targetReps: "10 次/側", rest: "30 秒", rpe: "自重", cues: "腳跟貼地前推膝蓋碰牆，維持踝關節背屈活動度。", muscles: "踝關節活動度", video: "http://www.youtube.com/watch?v=hm3S-SVj0OE" },
+
+      // 週四 2026/11/19
+      { date: "2026/11/19", rowType: "walk", phase: "午間散步 (NEAT)", name: "午間日常散步", basis: "步行紀錄 (KM/分)", baseKg: 0, targetSets: 0, targetReps: "30–45 分鐘 (約 3–4 km)", rest: "-", rpe: "正常步速 4.8–5.5 km/h", cues: "週二練腿後水腫開始消退，可恢復正常步速累積日常活動量。", muscles: "日常活動消耗 (NEAT)、心肺基礎", video: "http://www.youtube.com/watch?v=drObrz2eerA" },
+      { date: "2026/11/19", rowType: "strength", phase: "矯正熱身 1", name: "半跪姿髂腰肌伸展", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 2, targetReps: "30 秒/側", rest: "30 秒", rpe: "自重", cues: "單膝跪地，後腳臀大肌用力夾緊、尾椎內捲（骨盆後傾）後微前推，禁止挺腰。", muscles: "髂腰肌、股直肌（解除骨盆前傾拉力）", video: "http://www.youtube.com/watch?v=F2U1DGTeXkE" },
+      { date: "2026/11/19", rowType: "strength", phase: "矯正熱身 2", name: "椅面祈禱式闊背伸展", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 2, targetReps: "30 秒", rest: "30 秒", rpe: "自重", cues: "雙肘撐於平椅，吐氣將胸口與腋窩垂直下沉，解除闊背肌對含胸與骨盆的牽拉。", muscles: "闊背肌、胸椎伸展活動度", video: "http://www.youtube.com/watch?v=oimdr6wHS9U" },
+      { date: "2026/11/19", rowType: "strength", phase: "矯正熱身 3", name: "彈力帶水平拉開 (Band Pull-Apart)", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 2, targetReps: "15 下", rest: "30 秒", rpe: "輕阻力", cues: "站姿雙手平舉與肩同高，向兩側水平拉開彈力帶輕觸胸口；沉肩不聳肩、肋骨下沉不挺腰，專注肩胛骨內收夾緊。", muscles: "三角肌後束、菱形肌、中下斜方肌", video: "http://www.youtube.com/watch?v=geA81bxTE5k" },
+      { date: "2026/11/19", rowType: "strength", phase: "主課表 1", name: "平板啞鈴或槓鈴臥推", basis: "單支啞鈴 (×2)", baseKg: 0, targetSets: 4, targetReps: "8–10 下", rest: "90 秒", rpe: "RPE 7.5–8", cues: "用啞鈴填單支重；若用槓鈴請改基準為「總重 (含槓/機重)」、空槓填 20（純空槓外加重量填 0）。肋骨下沉避免過度拱腰。", muscles: "胸大肌中下束、前三角、三頭肌", video: "http://www.youtube.com/watch?v=t1PcPR55Fnk" },
+      { date: "2026/11/19", rowType: "strength", phase: "主課表 2", name: "30度上斜啞鈴臥推", basis: "單支啞鈴 (×2)", baseKg: 0, targetSets: 3, targetReps: "10–12 下", rest: "75 秒", rpe: "RPE 8", cues: "填「單支啞鈴」重量（系統自動×2支）。椅背調至 30 度，手肘微內收約 45 度下放，專注胸肌上束收縮。", muscles: "胸大肌上束（鎖骨端）、前三角肌", video: "http://www.youtube.com/watch?v=GFeioyT37x4" },
+      { date: "2026/11/19", rowType: "strength", phase: "主課表 3", name: "蝴蝶機夾胸 (Pec Deck Fly)", basis: "總重 (含槓/機重)", baseKg: 0, targetSets: 3, targetReps: "12–15 下", rest: "60 秒", rpe: "RPE 8", cues: "直接填插銷數字（磅數選 LB）。沉肩挺胸、上背貼實靠墊，手肘微屈向內合攏擠壓胸大肌。", muscles: "胸大肌內側與中束", video: "http://www.youtube.com/watch?v=fEOl1ZzWzNs" },
+      { date: "2026/11/19", rowType: "strength", phase: "主課表 4", name: "站姿或坐姿啞鈴側平舉", basis: "單支啞鈴 (×2)", baseKg: 0, targetSets: 4, targetReps: "12–15 下", rest: "60 秒", rpe: "輕中重量 (RPE 8)", cues: "填「單支啞鈴」重量（系統自動×2支）。微傾軀幹，手肘微屈帶動啞鈴向兩側平舉至肩高，控制下放不甩動。", muscles: "三角肌中束", video: "http://www.youtube.com/watch?v=iBbTSnMnjEA" },
+      { date: "2026/11/19", rowType: "strength", phase: "主課表 5", name: "滑輪繩索三頭肌下壓", basis: "總重 (含槓/機重)", baseKg: 0, targetSets: 3, targetReps: "10–12 下", rest: "60 秒", rpe: "RPE 8", cues: "直接填滑輪配重片數字（磅數選 LB）。大臂夾緊身體兩側固定，純靠伸肘將繩索下壓並向兩側分開鎖定。", muscles: "肱三頭肌（外側頭、長頭）", video: "http://www.youtube.com/watch?v=dvM2IoxpTnI" },
+      { date: "2026/11/19", rowType: "strength", phase: "核心收尾", name: "機械坐姿捲腹機 (Ab Crunch Machine)", basis: "總重 (含槓/機重)", baseKg: 0, targetSets: 3, targetReps: "12–15 下", rest: "60 秒", rpe: "RPE 8", cues: "直接填插銷數字（磅數選 LB）。吐氣時用上腹帶動胸廓向下捲曲，直接訓練肋骨下沉並改善骨盆前傾。", muscles: "腹直肌、深層核心穩定", video: "http://www.youtube.com/watch?v=yln2pdt0cKM" },
+      { date: "2026/11/19", rowType: "strength", phase: "訓後伸展", name: "靠牆單臂胸大肌伸展", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 2, targetReps: "30 秒/側", rest: "-", rpe: "自重", cues: "前臂貼牆呈 90 度，身體微向前轉開胸大肌，避免練胸後緊繃加重含胸。", muscles: "胸大肌、胸小肌伸展", video: "http://www.youtube.com/watch?v=4I2zlJyljHU" },
+
+      // 週五 2026/11/20
+      { date: "2026/11/20", rowType: "walk", phase: "午間散步 (NEAT)", name: "午間輕鬆保留體力散步", basis: "步行紀錄 (KM/分)", baseKg: 0, targetSets: 0, targetReps: "20–30 分鐘 (約 1.5–2.2 km)", rest: "-", rpe: "慢速留力 ≤ 4.5 km/h", cues: "【賽前留力】晚間有羽球專項，中午僅做短時慢速散步活絡下肢，避免消耗肌醣原與小腿彈性。", muscles: "賽前下肢活絡、保留體能", video: "http://www.youtube.com/watch?v=drObrz2eerA" },
+      { date: "2026/11/20", rowType: "strength", phase: "賽前熱身", name: "踝關節推牆 ＋ 髖關節旋轉 ＋ 肩袖外旋啟動", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 1, targetReps: "10 分鐘", rest: "-", rpe: "自重/彈力帶", cues: "下肢距週二訓練已滿 72 小時完成超量恢復，充分喚醒腳踝避震與肩袖穩定度。", muscles: "全身動態熱身、肩袖外旋肌群", video: "http://www.youtube.com/watch?v=rPtSCFB-vVQ" },
+      { date: "2026/11/20", rowType: "strength", phase: "專項運動", name: "晚間羽球專項對打與場上移動", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 1, targetReps: "晚間時段", rest: "-", rpe: "專項強度", cues: "運用核心 360 度腹壓穩定急停跨步與殺球發力，保護膝踝與下背。", muscles: "全身爆發力、心肺耐力、側向敏捷", video: "http://www.youtube.com/watch?v=BbvfSeGMCMU" },
+
+      // 週六 2026/11/21
+      { date: "2026/11/21", rowType: "walk", phase: "午間散步 (NEAT)", name: "午間戶外/日常恢復散步", basis: "步行紀錄 (KM/分)", baseKg: 0, targetSets: 0, targetReps: "30–40 分鐘 (約 2.5–3.2 km)", rest: "-", rpe: "輕鬆步速 4.5–5.0 km/h", cues: "排除累積代謝疲勞（若週末無固定走可下拉選「⏭️ 略過/調整」）。", muscles: "主動心肺恢復、代謝排除", video: "http://www.youtube.com/watch?v=drObrz2eerA" },
+      { date: "2026/11/21", rowType: "strength", phase: "主動恢復", name: "上背胸椎滾筒伸展", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 1, targetReps: "10–15 分鐘", rest: "-", rpe: "低強度", cues: "滾筒僅滾壓上背胸椎段打開含胸（嚴禁直接滾壓下背腰椎）。", muscles: "胸椎活動度、上背筋膜放鬆", video: "http://www.youtube.com/watch?v=xrLSl1nsnx8" },
+
+      // 週日 2026/11/22
+      { date: "2026/11/22", rowType: "walk", phase: "午間散步 (NEAT)", name: "午間日常恢復散步", basis: "步行紀錄 (KM/分)", baseKg: 0, targetSets: 0, targetReps: "30–40 分鐘 (約 2.5–3.2 km)", rest: "-", rpe: "輕鬆步速 4.5–5.0 km/h", cues: "維持週末基礎活動量與下肢血液循環（若未走可選「⏭️ 略過/調整」）。", muscles: "日常活動消耗 (NEAT)", video: "http://www.youtube.com/watch?v=drObrz2eerA" },
+      { date: "2026/11/22", rowType: "strength", phase: "靜態伸展", name: "股四頭肌、小腿與胸大肌靜態拉伸", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 1, targetReps: "15–20 分鐘", rest: "-", rpe: "自重", cues: "恢復下肢與胸肩肌肉彈性，補充足夠水分與碳水，準備迎接下週一循環。", muscles: "下肢肌群、胸肩肌群彈性恢復", video: "http://www.youtube.com/watch?v=3J_f13vo1FM" }
+    ];
+
+    function buildDefaultItems() {
+      const result = [];
+      let rowNum = 1;
+      DAYS_META.forEach(day => {
+        const dayFixed = RAW_BASE_ITEMS.filter(x => x.date === day.date);
+        dayFixed.forEach(item => {
+          result.push({
+            id: "row_" + rowNum++,
+            date: day.date,
+            weekday: day.weekday,
+            module: day.module,
+            rowType: item.rowType,
+            phase: item.phase,
+            name: item.name,
+            basis: item.basis,
+            baseKg: item.baseKg,
+            targetSets: item.targetSets,
+            targetReps: item.targetReps,
+            rest: item.rest,
+            rpe: item.rpe,
+            cues: item.cues,
+            muscles: item.muscles,
+            video: item.video,
+            addedWeight: "",
+            unit: "KG",
+            actualSets: "",
+            actualReps: "",
+            walkKm: "",
+            walkMin: "",
+            cardioKm: "",
+            cardioMin: "",
+            cardioSpeed: "",
+            cardioIncline: "",
+            status: "⬜ 待完成"
+          });
+        });
+
+        // 3 custom slots per day
+        for (let s = 1; s <= 3; s++) {
+          result.push({
+            id: "row_" + rowNum++,
+            date: day.date,
+            weekday: day.weekday,
+            module: day.module,
+            rowType: "custom",
+            phase: "自訂加練 / 替代 " + s,
+            name: "",
+            basis: "總重 (含槓/機重)",
+            baseKg: 0,
+            targetSets: "",
+            targetReps: "",
+            rest: "",
+            rpe: "",
+            cues: "",
+            muscles: "",
+            video: "",
+            addedWeight: "",
+            unit: "KG",
+            actualSets: "",
+            actualReps: "",
+            walkKm: "",
+            walkMin: "",
+            cardioKm: "",
+            cardioMin: "",
+            cardioSpeed: "",
+            cardioIncline: "",
+            status: "⬜ 待完成"
+          });
+        }
+
+        // 1 optional daily cardio row
+        result.push({
+          id: "row_" + rowNum++,
+          date: day.date,
+          weekday: day.weekday,
+          module: day.module,
+          rowType: "cardio",
+          phase: "專項有氧 (選填)",
+          name: "跑步機爬坡 / 跑步 / 有氧",
+          basis: "有氧紀錄 (速度/坡度)",
+          baseKg: 0,
+          targetSets: 0,
+          targetReps: "依當日體感紀錄 (選填)",
+          rest: "-",
+          rpe: "Zone 2 / 爬坡 / 慢跑",
+          cues: day.cardioCue,
+          muscles: "心肺耐力、有氧代謝（獨立統計不扣分）",
+          video: "",
+          addedWeight: "",
+          unit: "KG",
+          actualSets: "",
+          actualReps: "",
+          walkKm: "",
+          walkMin: "",
+          cardioKm: "",
+          cardioMin: "",
+          cardioSpeed: "",
+          cardioIncline: "",
+          status: "➖ 今日無有氧"
+        });
+      });
+      return result;
+    }
+
+    let items = [];
+    let machines = [];
+    let selectedDate = DAYS_META[0].date;
+    let selectedMachineFilter = "ALL";
+    let editingMachineId = null;
+    let currentFormRating = 5;
+    let currentFormPhoto = "";
+
+    function loadState() {
+      const defaultList = buildDefaultItems();
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS) || "null");
+        if (Array.isArray(saved) && saved.length === defaultList.length) {
+          items = defaultList.map((def, idx) => {
+            const old = saved[idx] || {};
+            return {
+              ...def,
+              name: def.rowType === "custom" || def.rowType === "cardio" ? (old.name !== undefined ? old.name : def.name) : def.name,
+              cues: def.rowType === "custom" ? (old.cues || "") : def.cues,
+              basis: old.basis || def.basis,
+              baseKg: old.baseKg !== undefined ? old.baseKg : def.baseKg,
+              addedWeight: old.addedWeight !== undefined ? old.addedWeight : "",
+              unit: old.unit || "KG",
+              actualSets: old.actualSets !== undefined ? old.actualSets : "",
+              actualReps: old.actualReps !== undefined ? old.actualReps : "",
+              walkKm: old.walkKm !== undefined ? old.walkKm : "",
+              walkMin: old.walkMin !== undefined ? old.walkMin : "",
+              cardioKm: old.cardioKm !== undefined ? old.cardioKm : "",
+              cardioMin: old.cardioMin !== undefined ? old.cardioMin : "",
+              cardioSpeed: old.cardioSpeed !== undefined ? old.cardioSpeed : "",
+              cardioIncline: old.cardioIncline !== undefined ? old.cardioIncline : "",
+              status: old.status || def.status
+            };
+          });
+        } else {
+          items = defaultList;
+        }
+      } catch (e) {
+        items = defaultList;
+      }
+
+      try {
+        const savedMachines = JSON.parse(localStorage.getItem(STORAGE_KEY_MACHINES) || "[]");
+        machines = Array.isArray(savedMachines) ? savedMachines : [];
+      } catch (e) {
+        machines = [];
+      }
+
+      const savedUrl = localStorage.getItem(STORAGE_KEY_GAS) || "";
+      document.getElementById("gasUrlInput").value = savedUrl;
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
+        localStorage.setItem(STORAGE_KEY_MACHINES, JSON.stringify(machines));
+        const el = document.getElementById("saveStatus");
+        const now = new Date();
+        el.textContent = "已儲存 " + String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+      } catch (e) {
+        showToast("⚠️ 儲存空間已滿，請清理部分舊照片或匯出備份");
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toastEl");
+      t.textContent = msg;
+      t.style.display = "block";
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => { t.style.display = "none"; }, 2600);
+    }
+
+    // Calculations
+    function calcStrengthMetrics(item) {
+      if (item.basis === "自重 / 彈力帶" || item.rowType === "walk" || item.rowType === "cardio") {
+        return { effectiveKg: 0, volumeKg: 0 };
+      }
+      const rawStr = String(item.addedWeight ?? "").trim();
+      if (rawStr === "") {
+        return { effectiveKg: 0, volumeKg: 0 };
+      }
+      const addedNum = parseFloat(rawStr) || 0;
+      const baseNum = parseFloat(item.baseKg) || 0;
+      const weightKg = item.unit === "LB" ? addedNum * 0.45359237 : addedNum;
+      const multSingle = item.basis === "單支啞鈴 (×2)" ? 2 : 1;
+      const effectiveKg = Math.round((weightKg * multSingle + baseNum) * 100) / 100;
+
+      const sets = parseFloat(item.actualSets) || 0;
+      const reps = parseFloat(item.actualReps) || 0;
+      const multSide = item.basis === "單邊計重 (×2)" ? 2 : 1;
+      const volumeKg = Math.round(effectiveKg * sets * reps * multSide * 10) / 10;
+      return { effectiveKg, volumeKg };
+    }
+
+    function calcWalkSpeed(item) {
+      const km = parseFloat(item.walkKm) || 0;
+      const min = parseFloat(item.walkMin) || 0;
+      if (km <= 0 || min <= 0) return 0;
+      return Math.round((km / (min / 60)) * 100) / 100;
+    }
+
+    function getDayStats(dateStr) {
+      const dayItems = items.filter(x => x.date === dateStr);
+      let validCount = 0;
+      let doneCount = 0;
+      let totalVol = 0;
+      let walkKm = 0;
+      let walkMin = 0;
+      let cardioKm = 0;
+      let cardioMin = 0;
+      let cardioSpeed = 0;
+      let cardioIncline = 0;
+      let cardioDone = false;
+
+      dayItems.forEach(it => {
+        const isBlankCustom = it.rowType === "custom" && String(it.name || "").trim() === "";
+        const isNoCardio = it.rowType === "cardio" && it.status === "➖ 今日無有氧";
+        if (!isBlankCustom && !isNoCardio) {
+          validCount++;
+          if (it.status === "✅ 已完成") doneCount++;
+        }
+        if (it.rowType === "strength" || (it.rowType === "custom" && !isBlankCustom)) {
+          totalVol += calcStrengthMetrics(it).volumeKg;
+        }
+        if (it.rowType === "walk") {
+          walkKm += parseFloat(it.walkKm) || 0;
+          walkMin += parseFloat(it.walkMin) || 0;
+        }
+        if (it.rowType === "cardio") {
+          cardioKm += parseFloat(it.cardioKm) || 0;
+          cardioMin += parseFloat(it.cardioMin) || 0;
+          cardioSpeed = parseFloat(it.cardioSpeed) || 0;
+          cardioIncline = parseFloat(it.cardioIncline) || 0;
+          if (it.status === "✅ 已完成") cardioDone = true;
+        }
+      });
+
+      const walkSpeed = walkMin > 0 ? Math.round((walkKm / (walkMin / 60)) * 100) / 100 : 0;
+      const rate = validCount > 0 ? Math.round((doneCount / validCount) * 100) : 0;
+      return {
+        validCount,
+        doneCount,
+        rate,
+        totalVol: Math.round(totalVol * 10) / 10,
+        walkKm: Math.round(walkKm * 100) / 100,
+        walkMin: Math.round(walkMin),
+        walkSpeed,
+        cardioKm: Math.round(cardioKm * 100) / 100,
+        cardioMin: Math.round(cardioMin),
+        cardioSpeed,
+        cardioIncline,
+        cardioDone
+      };
+    }
+
+    // Render Day Strip
+    function renderDayStrip() {
+      const strip = document.getElementById("dayStrip");
+      strip.innerHTML = DAYS_META.map(d => {
+        const st = getDayStats(d.date);
+        const active = d.date === selectedDate ? "active" : "";
+        return `
+          <div class="day-pill ${active}" data-date="${d.date}">
+            <span class="wk">${d.weekday}</span>
+            <span class="dt">${d.date.slice(5)}</span>
+            <span class="tag">${d.shortTag} ${st.doneCount}/${st.validCount}</span>
+          </div>
+        `;
+      }).join("");
+
+      strip.querySelectorAll(".day-pill").forEach(el => {
+        el.addEventListener("click", () => {
+          selectedDate = el.dataset.date;
+          renderScheduleView();
+        });
+      });
+    }
+
+    function renderDaySummary() {
+      const meta = DAYS_META.find(d => d.date === selectedDate);
+      const st = getDayStats(selectedDate);
+      const box = document.getElementById("daySummaryCard");
+      const cardioText = st.cardioDone || st.cardioKm > 0 || st.cardioMin > 0
+        ? `${st.cardioKm} km｜${st.cardioMin} 分｜均速 ${st.cardioSpeed}｜坡度 ${st.cardioIncline}%`
+        : "今日無有氧（未做不扣分）";
+
+      box.innerHTML = `
+        <div class="day-module-title">
+          <span>${meta.date}（${meta.weekday}）${meta.module}</span>
+          <span class="completion-pill">完成度 ${st.doneCount} / ${st.validCount}（${st.rate}%）</span>
+        </div>
+        <div class="track-mini-grid">
+          <div class="mini-box strength">
+            <span class="lbl">🏋️ 軌道二｜當日重訓總容量</span>
+            <span class="val">${st.totalVol.toLocaleString()} kg</span>
+          </div>
+          <div class="mini-box walk">
+            <span class="lbl">🚶 軌道一｜午間散步 NEAT</span>
+            <span class="val">${st.walkKm} km｜${st.walkMin} 分（${st.walkSpeed} km/h）</span>
+          </div>
+          <div class="mini-box cardio">
+            <span class="lbl">🏃 軌道三｜專項有氧紀錄</span>
+            <span class="val">${cardioText}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function statusClass(status) {
+      if (status === "✅ 已完成") return "done";
+      if (status === "⏭️ 略過/調整") return "skip";
+      if (status === "➖ 今日無有氧") return "none";
+      return "";
+    }
+
+    function renderScheduleView() {
+      renderDayStrip();
+      renderDaySummary();
+
+      const container = document.getElementById("scheduleContainer");
+      const dayItems = items.filter(x => x.date === selectedDate);
+      const walkItems = dayItems.filter(x => x.rowType === "walk");
+      const strengthItems = dayItems.filter(x => x.rowType === "strength");
+      const customItems = dayItems.filter(x => x.rowType === "custom");
+      const cardioItems = dayItems.filter(x => x.rowType === "cardio");
+
+      let html = "";
+
+      // Section 1: Walk
+      html += `<div class="track-section-hdr walk-hdr"><span>🚶 軌道一｜午間日常散步 (NEAT)</span><span>獨立累計・不混入重訓</span></div>`;
+      walkItems.forEach(it => {
+        const speed = calcWalkSpeed(it);
+        const isSlowDay = (it.date === "2026/11/18" || it.date === "2026/11/20");
+        const speedWarn = isSlowDay && speed > 4.5
+          ? `<div class="warn-banner">⚠️ 今日建議控速 ≤ 4.5 km/h（目前 ${speed} km/h），請放慢步速以利修復與留力。</div>`
+          : "";
+        html += `
+          <div class="ex-card walk-card ${it.status === "✅ 已完成" ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
+            <div class="card-top-row">
+              <div>
+                <span class="phase-badge walk">${it.phase}</span>
+                <h3 class="ex-name">${it.name}</h3>
+              </div>
+              <select class="status-select ${statusClass(it.status)}" data-field="status">
+                <option value="⬜ 待完成" ${it.status === "⬜ 待完成" ? "selected" : ""}>⬜ 待完成</option>
+                <option value="✅ 已完成" ${it.status === "✅ 已完成" ? "selected" : ""}>✅ 已完成</option>
+                <option value="⏭️ 略過/調整" ${it.status === "⏭️ 略過/調整" ? "selected" : ""}>⏭️ 略過/調整</option>
+              </select>
+            </div>
+            <div class="meta-chips">
+              <span class="meta-chip">目標：${it.targetReps}</span>
+              <span class="meta-chip">建議：${it.rpe}</span>
+            </div>
+            <div class="cue-box">${it.cues}</div>
+            <div class="input-grid">
+              <div class="field-group">
+                <label>散步距離 (km)</label>
+                <input type="number" step="0.01" min="0" class="ctrl-input" data-field="walkKm" value="${it.walkKm}" placeholder="例：3.2" />
+              </div>
+              <div class="field-group">
+                <label>散步時長 (分鐘)</label>
+                <input type="number" step="1" min="0" class="ctrl-input" data-field="walkMin" value="${it.walkMin}" placeholder="例：40" />
+              </div>
+            </div>
+            <div class="calc-strip walk-calc">
+              <span>自動換算平均時速</span>
+              <span>${speed} km/h</span>
+            </div>
+            ${speedWarn}
+          </div>
+        `;
+      });
+
+      // Section 2: Strength
+      html += `<div class="track-section-hdr strength-hdr"><span>🏋️ 軌道二｜重訓主課表與體態矯正動作</span><span>純文字休息提示・無計時器</span></div>`;
+      strengthItems.forEach(it => {
+        const m = calcStrengthMetrics(it);
+        const isBodyweight = it.basis === "自重 / 彈力帶";
+        const ytHtml = it.video
+          ? `<a href="${it.video}" target="_blank" rel="noopener noreferrer" class="yt-btn">▶ 觀看動作示範短片</a>`
+          : "";
+        html += `
+          <div class="ex-card ${it.status === "✅ 已完成" ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
+            <div class="card-top-row">
+              <div>
+                <span class="phase-badge">${it.phase}</span>
+                <h3 class="ex-name">${it.name}</h3>
+              </div>
+              <select class="status-select ${statusClass(it.status)}" data-field="status">
+                <option value="⬜ 待完成" ${it.status === "⬜ 待完成" ? "selected" : ""}>⬜ 待完成</option>
+                <option value="✅ 已完成" ${it.status === "✅ 已完成" ? "selected" : ""}>✅ 已完成</option>
+                <option value="⏭️ 略過/調整" ${it.status === "⏭️ 略過/調整" ? "selected" : ""}>⏭️ 略過/調整</option>
+              </select>
+            </div>
+            <div class="meta-chips">
+              <span class="meta-chip">目標：${it.targetSets} 組 × ${it.targetReps}</span>
+              <span class="meta-chip">組間休息：${it.rest}</span>
+              <span class="meta-chip">${it.rpe}</span>
+            </div>
+            <div class="cue-box">
+              <div><strong>力學與操作要點：</strong>${it.cues}</div>
+              <div style="margin-top:4px;"><strong>目標部位：</strong>${it.muscles}</div>
+              ${ytHtml}
+            </div>
+            <div class="input-grid">
+              <div class="field-group">
+                <label>計量基準</label>
+                <select class="ctrl-select" data-field="basis">
+                  <option value="總重 (含槓/機重)" ${it.basis === "總重 (含槓/機重)" ? "selected" : ""}>總重 (含槓/機重)</option>
+                  <option value="單邊計重 (×2)" ${it.basis === "單邊計重 (×2)" ? "selected" : ""}>單邊計重 (×2)</option>
+                  <option value="單支啞鈴 (×2)" ${it.basis === "單支啞鈴 (×2)" ? "selected" : ""}>單支啞鈴 (×2)</option>
+                  <option value="自重 / 彈力帶" ${it.basis === "自重 / 彈力帶" ? "selected" : ""}>自重 / 彈力帶</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label>空槓/機台重 (kg)</label>
+                <input type="number" step="0.5" min="0" class="ctrl-input" data-field="baseKg" value="${it.baseKg}" ${isBodyweight ? "disabled" : ""} />
+              </div>
+              <div class="field-group">
+                <label>外加/手持重量</label>
+                <div class="weight-unit-row">
+                  <input type="number" step="0.5" min="0" class="ctrl-input" data-field="addedWeight" value="${it.addedWeight}" placeholder="${isBodyweight ? "自重" : "空槓填0"}" ${isBodyweight ? "disabled" : ""} />
+                  <button type="button" class="unit-btn ${it.unit === "LB" ? "lb" : ""}" data-action="toggleUnit" ${isBodyweight ? "disabled" : ""}>${it.unit}</button>
+                </div>
+              </div>
+              <div class="field-group">
+                <label>實際組數</label>
+                <input type="number" step="1" min="0" class="ctrl-input" data-field="actualSets" value="${it.actualSets}" placeholder="${it.targetSets || 3}" />
+              </div>
+              <div class="field-group">
+                <label>實際次數 (單組)</label>
+                <input type="number" step="1" min="0" class="ctrl-input" data-field="actualReps" value="${it.actualReps}" placeholder="10" />
+              </div>
+            </div>
+            <div class="calc-strip">
+              <span>單組有效總重：${m.effectiveKg} kg</span>
+              <span>總訓練容量 Volume：${m.volumeKg.toLocaleString()} kg</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // Section 3: 3 Custom Slots (Placed right after Strength per user request)
+      html += `<div class="track-section-hdr custom-hdr"><span>紫框自由填寫區｜自訂加練 / 器材排隊替代槽（3 格）</span><span>名稱空白不計入完成率</span></div>`;
+      customItems.forEach((it, idx) => {
+        const m = calcStrengthMetrics(it);
+        const isBodyweight = it.basis === "自重 / 彈力帶";
+        html += `
+          <div class="ex-card custom-card ${it.status === "✅ 已完成" ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
+            <div class="card-top-row">
+              <div style="flex:1;">
+                <span class="phase-badge custom">自訂加練 / 替代 ${idx + 1}</span>
+                <input type="text" class="ctrl-input" data-field="name" value="${escapeHtml(it.name)}" placeholder="輸入自訂動作名稱（例：坐姿推胸機），留白不計分" style="margin-top:4px; font-weight:700;" />
+              </div>
+              <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-end;">
+                <select class="status-select ${statusClass(it.status)}" data-field="status">
+                  <option value="⬜ 待完成" ${it.status === "⬜ 待完成" ? "selected" : ""}>⬜ 待完成</option>
+                  <option value="✅ 已完成" ${it.status === "✅ 已完成" ? "selected" : ""}>✅ 已完成</option>
+                  <option value="⏭️ 略過/調整" ${it.status === "⏭️ 略過/調整" ? "selected" : ""}>⏭️ 略過/調整</option>
+                </select>
+                <button type="button" class="btn btn-outline btn-sm" data-action="clearCustom">清空此格</button>
+              </div>
+            </div>
+            <div class="field-group" style="margin-bottom:8px;">
+              <label>個人筆記 / 座椅設定</label>
+              <input type="text" class="ctrl-input" data-field="cues" value="${escapeHtml(it.cues)}" placeholder="選填：椅墊高度、發力感受或替代原因" />
+            </div>
+            <div class="input-grid">
+              <div class="field-group">
+                <label>計量基準</label>
+                <select class="ctrl-select" data-field="basis">
+                  <option value="總重 (含槓/機重)" ${it.basis === "總重 (含槓/機重)" ? "selected" : ""}>總重 (含槓/機重)</option>
+                  <option value="單邊計重 (×2)" ${it.basis === "單邊計重 (×2)" ? "selected" : ""}>單邊計重 (×2)</option>
+                  <option value="單支啞鈴 (×2)" ${it.basis === "單支啞鈴 (×2)" ? "selected" : ""}>單支啞鈴 (×2)</option>
+                  <option value="自重 / 彈力帶" ${it.basis === "自重 / 彈力帶" ? "selected" : ""}>自重 / 彈力帶</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label>空槓/機台重 (kg)</label>
+                <input type="number" step="0.5" min="0" class="ctrl-input" data-field="baseKg" value="${it.baseKg}" ${isBodyweight ? "disabled" : ""} />
+              </div>
+              <div class="field-group">
+                <label>外加/手持重量</label>
+                <div class="weight-unit-row">
+                  <input type="number" step="0.5" min="0" class="ctrl-input" data-field="addedWeight" value="${it.addedWeight}" placeholder="重量" ${isBodyweight ? "disabled" : ""} />
+                  <button type="button" class="unit-btn ${it.unit === "LB" ? "lb" : ""}" data-action="toggleUnit" ${isBodyweight ? "disabled" : ""}>${it.unit}</button>
+                </div>
+              </div>
+              <div class="field-group">
+                <label>實際組數</label>
+                <input type="number" step="1" min="0" class="ctrl-input" data-field="actualSets" value="${it.actualSets}" placeholder="3" />
+              </div>
+              <div class="field-group">
+                <label>實際次數 (單組)</label>
+                <input type="number" step="1" min="0" class="ctrl-input" data-field="actualReps" value="${it.actualReps}" placeholder="12" />
+              </div>
+            </div>
+            <div class="calc-strip">
+              <span>單組有效總重：${m.effectiveKg} kg</span>
+              <span>總訓練容量 Volume：${m.volumeKg.toLocaleString()} kg</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // Section 4: Cardio (Placed at the bottom of each day per user request)
+      html += `<div class="track-section-hdr cardio-hdr"><span>🏃 軌道三｜每日專項有氧紀錄（選填・未做不扣分）</span><span>爬坡 / 跑步 / 速度 / 坡度</span></div>`;
+      cardioItems.forEach(it => {
+        const inc = parseFloat(it.cardioIncline) || 0;
+        const incWarn = inc >= 8
+          ? `<div class="warn-banner">⚠️ 高坡度提醒（${inc}%）：嚴禁雙手緊抓扶手身體後仰，請維持肋骨下沉、核心微收與臀腿主動推蹬。</div>`
+          : "";
+        html += `
+          <div class="ex-card cardio-card ${it.status === "✅ 已完成" ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
+            <div class="card-top-row">
+              <div style="flex:1;">
+                <span class="phase-badge cardio">${it.phase}</span>
+                <input type="text" class="ctrl-input" data-field="name" value="${escapeHtml(it.name)}" style="margin-top:4px; font-weight:700;" />
+              </div>
+              <select class="status-select ${statusClass(it.status)}" data-field="status">
+                <option value="➖ 今日無有氧" ${it.status === "➖ 今日無有氧" ? "selected" : ""}>➖ 今日無有氧</option>
+                <option value="✅ 已完成" ${it.status === "✅ 已完成" ? "selected" : ""}>✅ 已完成</option>
+                <option value="⏭️ 略過/調整" ${it.status === "⏭️ 略過/調整" ? "selected" : ""}>⏭️ 略過/調整</option>
+              </select>
+            </div>
+            <div class="preset-pills">
+              <button type="button" class="preset-pill" data-preset="跑步機爬坡">⛰️ 跑步機爬坡</button>
+              <button type="button" class="preset-pill" data-preset="跑步機慢跑">🏃 跑步機慢跑</button>
+              <button type="button" class="preset-pill" data-preset="戶外跑步">🌳 戶外跑步</button>
+              <button type="button" class="preset-pill" data-preset="滑步機 / 飛輪">🚴 滑步機 / 飛輪</button>
+            </div>
+            <div class="cue-box">${it.cues}</div>
+            <div class="input-grid">
+              <div class="field-group">
+                <label>有氧距離 (km)</label>
+                <input type="number" step="0.01" min="0" class="ctrl-input" data-field="cardioKm" value="${it.cardioKm}" placeholder="例：2.5" />
+              </div>
+              <div class="field-group">
+                <label>有氧時長 (分鐘)</label>
+                <input type="number" step="1" min="0" class="ctrl-input" data-field="cardioMin" value="${it.cardioMin}" placeholder="例：25" />
+              </div>
+              <div class="field-group">
+                <label>設定速度 (km/h)</label>
+                <input type="number" step="0.1" min="0" class="ctrl-input" data-field="cardioSpeed" value="${it.cardioSpeed}" placeholder="例：5.2" />
+              </div>
+              <div class="field-group">
+                <label>設定坡度 (%)</label>
+                <input type="number" step="0.5" min="0" class="ctrl-input" data-field="cardioIncline" value="${it.cardioIncline}" placeholder="例：8.0" />
+              </div>
+            </div>
+            <div class="calc-strip cardio-calc">
+              <span>當日有氧彙總：${parseFloat(it.cardioKm) || 0} km｜${parseFloat(it.cardioMin) || 0} 分鐘</span>
+              <span>速度 ${parseFloat(it.cardioSpeed) || 0} km/h｜坡度 ${inc}%</span>
+            </div>
+            ${incWarn}
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      bindScheduleEvents();
+    }
+
+    function bindScheduleEvents() {
+      const container = document.getElementById("scheduleContainer");
+
+      container.querySelectorAll("[data-field]").forEach(el => {
+        const handler = (e) => {
+          const card = e.target.closest(".ex-card");
+          const id = card.dataset.id;
+          const item = items.find(x => x.id === id);
+          if (!item) return;
+          const field = e.target.dataset.field;
+          item[field] = e.target.value;
+
+          // Auto-switch cardio status to done when metrics are entered
+          if (item.rowType === "cardio" && ["cardioKm", "cardioMin", "cardioSpeed", "cardioIncline"].includes(field)) {
+            const hasAny = (parseFloat(item.cardioKm) || 0) > 0 || (parseFloat(item.cardioMin) || 0) > 0 || (parseFloat(item.cardioSpeed) || 0) > 0 || (parseFloat(item.cardioIncline) || 0) > 0;
+            if (hasAny && item.status === "➖ 今日無有氧") {
+              item.status = "✅ 已完成";
+            }
+          }
+
+          saveState();
+          // Re-render only when structural field changes (basis/status), otherwise update live numbers smoothly
+          if (field === "basis" || field === "status") {
+            renderScheduleView();
+          } else {
+            updateCardLiveDisplay(card, item);
+            renderDayStrip();
+            renderDaySummary();
+          }
+        };
+        el.addEventListener("input", handler);
+        if (el.tagName === "SELECT") {
+          el.addEventListener("change", handler);
+        }
+      });
+
+      container.querySelectorAll('[data-action="toggleUnit"]').forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const card = e.target.closest(".ex-card");
+          const item = items.find(x => x.id === card.dataset.id);
+          if (!item) return;
+          item.unit = item.unit === "KG" ? "LB" : "KG";
+          saveState();
+          renderScheduleView();
+        });
+      });
+
+      container.querySelectorAll('[data-action="clearCustom"]').forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const card = e.target.closest(".ex-card");
+          const item = items.find(x => x.id === card.dataset.id);
+          if (!item) return;
+          item.name = "";
+          item.cues = "";
+          item.basis = "總重 (含槓/機重)";
+          item.baseKg = 0;
+          item.addedWeight = "";
+          item.unit = "KG";
+          item.actualSets = "";
+          item.actualReps = "";
+          item.status = "⬜ 待完成";
+          saveState();
+          renderScheduleView();
+          showToast("已清空此自訂槽");
+        });
+      });
+
+      container.querySelectorAll("[data-preset]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const card = e.target.closest(".ex-card");
+          const item = items.find(x => x.id === card.dataset.id);
+          if (!item) return;
+          item.name = e.target.dataset.preset;
+          saveState();
+          renderScheduleView();
+        });
+      });
+    }
+
+    function updateCardLiveDisplay(card, item) {
+      if (item.rowType === "walk") {
+        const speed = calcWalkSpeed(item);
+        const strip = card.querySelector(".calc-strip");
+        if (strip) strip.innerHTML = `<span>自動換算平均時速</span><span>${speed} km/h</span>`;
+      } else if (item.rowType === "cardio") {
+        const inc = parseFloat(item.cardioIncline) || 0;
+        const strip = card.querySelector(".calc-strip");
+        if (strip) {
+          strip.innerHTML = `<span>當日有氧彙總：${parseFloat(item.cardioKm) || 0} km｜${parseFloat(item.cardioMin) || 0} 分鐘</span><span>速度 ${parseFloat(item.cardioSpeed) || 0} km/h｜坡度 ${inc}%</span>`;
+        }
+        const statusSel = card.querySelector('[data-field="status"]');
+        if (statusSel && statusSel.value !== item.status) {
+          statusSel.value = item.status;
+          statusSel.className = "status-select " + statusClass(item.status);
+        }
+      } else {
+        const m = calcStrengthMetrics(item);
+        const strip = card.querySelector(".calc-strip");
+        if (strip) strip.innerHTML = `<span>單組有效總重：${m.effectiveKg} kg</span><span>總訓練容量 Volume：${m.volumeKg.toLocaleString()} kg</span>`;
+      }
+    }
+
+    // Machine Library Logic
+    function renderStarSelector() {
+      const row = document.getElementById("mStarRow");
+      row.innerHTML = [1, 2, 3, 4, 5].map(n => `
+        <button type="button" class="star-btn ${n <= currentFormRating ? "active" : ""}" data-star="${n}">★</button>
+      `).join("");
+      row.querySelectorAll(".star-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentFormRating = parseInt(btn.dataset.star, 10);
+          renderStarSelector();
+        });
+      });
+    }
+
+    function compressImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            const maxW = 720;
+            let w = img.width;
+            let h = img.height;
+            if (w > maxW) {
+              h = Math.round((h * maxW) / w);
+              w = maxW;
+            }
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL("image/jpeg", 0.72));
+          };
+          img.onerror = reject;
+          img.src = ev.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function resetMachineForm() {
+      editingMachineId = null;
+      document.getElementById("machineFormTitle").textContent = "📸 新增感受良好的健身房器械（拍照登錄供日後排課）";
+      document.getElementById("mName").value = "";
+      document.getElementById("mCategory").value = "週一｜拉日（背/二頭）";
+      document.getElementById("mSetup").value = "";
+      document.getElementById("mNotes").value = "";
+      document.getElementById("mPhotoInput").value = "";
+      currentFormRating = 5;
+      currentFormPhoto = "";
+      document.getElementById("mPhotoPreviewWrap").style.display = "none";
+      document.getElementById("mCancelEditBtn").style.display = "none";
+      renderStarSelector();
+    }
+
+    function renderMachineLibrary() {
+      const filters = ["ALL", "週一｜拉日（背/二頭）", "週二｜腿日（股四頭/臀腿）", "週四｜推日（胸/肩/三頭）", "有氧與其他"];
+      const filterRow = document.getElementById("machineFilterRow");
+      filterRow.innerHTML = filters.map(f => `
+        <button type="button" class="preset-pill" style="${selectedMachineFilter === f ? "background:#1e293b;color:#fff;border-color:#1e293b;" : "color:#334155;border-color:#cbd5e1;"}" data-mfilter="${f}">
+          ${f === "ALL" ? "全部收藏 (" + machines.length + ")" : f}
+        </button>
+      `).join("");
+
+      filterRow.querySelectorAll("[data-mfilter]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          selectedMachineFilter = btn.dataset.mfilter;
+          renderMachineLibrary();
+        });
+      });
+
+      const list = selectedMachineFilter === "ALL" ? machines : machines.filter(m => m.category === selectedMachineFilter);
+      const container = document.getElementById("machineListContainer");
+
+      if (list.length === 0) {
+        container.innerHTML = `<div class="panel-card" style="grid-column:1/-1; text-align:center; color:#64748b;">尚無符合條件的收藏器械。在健身工廠練到發力感好的機器時，可隨時拍照並登錄於上方表單。</div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(m => {
+        const stars = "★".repeat(m.rating || 5) + "☆".repeat(5 - (m.rating || 5));
+        const imgHtml = m.photo
+          ? `<img src="${m.photo}" alt="${escapeHtml(m.name)}" class="machine-thumb" data-zoom="${m.id}" />`
+          : `<div class="machine-thumb" style="display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:0.85rem;cursor:default;">未附照片</div>`;
+        return `
+          <div class="machine-item">
+            ${imgHtml}
+            <div class="machine-body">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="phase-badge">${escapeHtml(m.category)}</span>
+                <span style="color:#f59e0b; font-weight:700; font-size:0.9rem;">${stars}</span>
+              </div>
+              <h3 class="ex-name" style="font-size:0.96rem;">${escapeHtml(m.name)}</h3>
+              ${m.setup ? `<div style="font-size:0.78rem; color:#0f766e; font-weight:700;">設定：${escapeHtml(m.setup)}</div>` : ""}
+              ${m.notes ? `<div style="font-size:0.8rem; color:#475569;">${escapeHtml(m.notes)}</div>` : ""}
+              <div style="margin-top:auto; padding-top:8px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9;">
+                <span style="font-size:0.72rem; color:#94a3b8;">${m.date || ""}</span>
+                <div style="display:flex; gap:6px;">
+                  <button type="button" class="btn btn-outline btn-sm" data-medit="${m.id}">編輯</button>
+                  <button type="button" class="btn btn-danger btn-sm" data-mdel="${m.id}">刪除</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      container.querySelectorAll("[data-zoom]").forEach(img => {
+        img.addEventListener("click", () => {
+          const m = machines.find(x => x.id === img.dataset.zoom);
+          if (m && m.photo) {
+            document.getElementById("modalImgEl").src = m.photo;
+            document.getElementById("imgModal").classList.add("open");
+          }
+        });
+      });
+
+      container.querySelectorAll("[data-medit]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const m = machines.find(x => x.id === btn.dataset.medit);
+          if (!m) return;
+          editingMachineId = m.id;
+          document.getElementById("machineFormTitle").textContent = "✏️ 編輯器械紀錄";
+          document.getElementById("mName").value = m.name;
+          document.getElementById("mCategory").value = m.category;
+          document.getElementById("mSetup").value = m.setup || "";
+          document.getElementById("mNotes").value = m.notes || "";
+          currentFormRating = m.rating || 5;
+          currentFormPhoto = m.photo || "";
+          if (currentFormPhoto) {
+            document.getElementById("mPhotoPreview").src = currentFormPhoto;
+            document.getElementById("mPhotoPreviewWrap").style.display = "flex";
+          } else {
+            document.getElementById("mPhotoPreviewWrap").style.display = "none";
+          }
+          document.getElementById("mCancelEditBtn").style.display = "inline-flex";
+          renderStarSelector();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+
+      container.querySelectorAll("[data-mdel]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          machines = machines.filter(x => x.id !== btn.dataset.mdel);
+          saveState();
+          renderMachineLibrary();
+          showToast("已刪除器械紀錄");
+        });
+      });
+    }
+
+    // Overview View
+    function renderOverviewView() {
+      const statsByDay = DAYS_META.map(d => ({ ...d, ...getDayStats(d.date) }));
+      const totValid = statsByDay.reduce((s, x) => s + x.validCount, 0);
+      const totDone = statsByDay.reduce((s, x) => s + x.doneCount, 0);
+      const totRate = totValid > 0 ? Math.round((totDone / totValid) * 100) : 0;
+      const totVol = Math.round(statsByDay.reduce((s, x) => s + x.totalVol, 0) * 10) / 10;
+      const totWalkKm = Math.round(statsByDay.reduce((s, x) => s + x.walkKm, 0) * 100) / 100;
+      const totWalkMin = statsByDay.reduce((s, x) => s + x.walkMin, 0);
+      const avgWalkSpeed = totWalkMin > 0 ? Math.round((totWalkKm / (totWalkMin / 60)) * 100) / 100 : 0;
+      const totCardioKm = Math.round(statsByDay.reduce((s, x) => s + x.cardioKm, 0) * 100) / 100;
+      const totCardioMin = statsByDay.reduce((s, x) => s + x.cardioMin, 0);
+
+      document.getElementById("overviewKpiGrid").innerHTML = `
+        <div class="kpi-card">
+          <div class="k-title">全週有效任務完成率</div>
+          <div class="k-val">${totRate}%</div>
+          <div class="k-sub">已完成 ${totDone} / ${totValid} 項（空白槽與無有氧不扣分）</div>
+        </div>
+        <div class="kpi-card">
+          <div class="k-title">重訓總容量 Volume</div>
+          <div class="k-val" style="color:#0f766e;">${totVol.toLocaleString()} kg</div>
+          <div class="k-sub">含單邊(×2)、單支啞鈴(×2)與 LB 自動換算</div>
+        </div>
+        <div class="kpi-card">
+          <div class="k-title">午間散步 NEAT 累計</div>
+          <div class="k-val" style="color:#0369a1;">${totWalkKm} km</div>
+          <div class="k-sub">總時長 ${totWalkMin} 分｜全週均速 ${avgWalkSpeed} km/h</div>
+        </div>
+        <div class="kpi-card">
+          <div class="k-title">專項有氧累計</div>
+          <div class="k-val" style="color:#be123c;">${totCardioKm} km</div>
+          <div class="k-sub">總時長 ${totCardioMin} 分｜收藏器械 ${machines.length} 台</div>
+        </div>
+      `;
+
+      const maxVol = Math.max(1, ...statsByDay.map(x => x.totalVol));
+      document.getElementById("chartStrength").innerHTML = statsByDay.map(d => `
+        <div class="bar-row">
+          <strong>${d.weekday} ${d.date.slice(5)}</strong>
+          <div class="bar-track"><div class="bar-fill teal" style="width:${Math.round((d.totalVol / maxVol) * 100)}%"></div></div>
+          <span style="text-align:right; font-weight:700; color:#0f766e;">${d.totalVol.toLocaleString()} kg</span>
+        </div>
+      `).join("");
+
+      const maxWalk = Math.max(1, ...statsByDay.map(x => x.walkKm));
+      document.getElementById("chartWalk").innerHTML = statsByDay.map(d => `
+        <div class="bar-row">
+          <strong>${d.weekday} ${d.date.slice(5)}</strong>
+          <div class="bar-track"><div class="bar-fill sky" style="width:${Math.round((d.walkKm / maxWalk) * 100)}%"></div></div>
+          <span style="text-align:right; font-weight:700; color:#0369a1;">${d.walkKm} km (${d.walkSpeed})</span>
+        </div>
+      `).join("");
+
+      const maxCardio = Math.max(1, ...statsByDay.map(x => x.cardioKm));
+      document.getElementById("chartCardio").innerHTML = statsByDay.map(d => `
+        <div class="bar-row">
+          <strong>${d.weekday} ${d.date.slice(5)}</strong>
+          <div class="bar-track"><div class="bar-fill rose" style="width:${Math.round((d.cardioKm / maxCardio) * 100)}%"></div></div>
+          <span style="text-align:right; font-weight:700; color:#be123c;">${d.cardioKm} km / ${d.cardioIncline}%</span>
+        </div>
+      `).join("");
+
+      document.getElementById("overviewTableWrap").innerHTML = `
+        <table class="summary-tbl">
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>星期</th>
+              <th>課表主題</th>
+              <th>完成度</th>
+              <th>重訓容量 (kg)</th>
+              <th>散步距離 (km)</th>
+              <th>散步均速</th>
+              <th>有氧距離 (km)</th>
+              <th>有氧時長/坡度</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${statsByDay.map(d => `
+              <tr>
+                <td>${d.date}</td>
+                <td><strong>${d.weekday}</strong></td>
+                <td style="text-align:left;">${d.module}</td>
+                <td>${d.doneCount}/${d.validCount} (${d.rate}%)</td>
+                <td style="font-weight:700; color:#0f766e;">${d.totalVol.toLocaleString()}</td>
+                <td style="color:#0369a1;">${d.walkKm}</td>
+                <td style="color:#0369a1;">${d.walkSpeed} km/h</td>
+                <td style="color:#be123c;">${d.cardioKm}</td>
+                <td style="color:#be123c;">${d.cardioMin}分 / ${d.cardioIncline}%</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // Cloud Sync & Export
+    const GAS_CODE_TEMPLATE = `function doGet(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetSched = ss.getSheetByName("每日詳細訓練課表");
+  var sheetMach = ss.getSheetByName("器械感受收藏庫");
+  var schedData = sheetSched ? sheetSched.getDataRange().getValues() : [];
+  var machData = sheetMach ? sheetMach.getDataRange().getValues() : [];
+  return ContentService.createTextOutput(JSON.stringify({
+    status: "ok",
+    schedule: schedData,
+    machines: machData
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var payload = JSON.parse(e.postData.contents);
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  if (payload.schedule && payload.schedule.length > 0) {
+    var sheetSched = ss.getSheetByName("每日詳細訓練課表") || ss.insertSheet("每日詳細訓練課表");
+    sheetSched.clearContents();
+    sheetSched.getRange(1, 1, payload.schedule.length, payload.schedule[0].length).setValues(payload.schedule);
+  }
+
+  if (payload.machines) {
+    var sheetMach = ss.getSheetByName("器械感受收藏庫") || ss.insertSheet("器械感受收藏庫");
+    sheetMach.clearContents();
+    var headers = [["ID", "登錄日期", "器材名稱", "分類模式", "評分(1-5)", "座椅/設定參數", "發力感受與筆記"]];
+    var rows = payload.machines.map(function(m) {
+      return [m.id, m.date || "", m.name || "", m.category || "", m.rating || 5, m.setup || "", m.notes || ""];
+    });
+    var allMach = headers.concat(rows);
+    sheetMach.getRange(1, 1, allMach.length, 7).setValues(allMach);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({ status: "saved" }))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+    function build28ColRows() {
+      const headers = [
+        "日期", "星期", "課表模組", "階段 / 類別", "動作 / 有氧項目名稱", "計量基準",
+        "空槓/機台重(kg)", "目標組數", "目標次數 / 時間", "組間休息", "建議強度 / 步速",
+        "作法與力學修正要點", "目標訓練部位", "示範短影片", "外加/手持重量", "單位",
+        "實際組數", "實際次數(單組)", "單組有效總重(kg)", "總訓練容量 Volume(kg)",
+        "散步距離 (km)", "散步時長 (分鐘)", "散步均速 (km/h)",
+        "有氧距離 (km)", "有氧時長 (分鐘)", "有氧速度 (km/h)", "有氧坡度 (%)", "完成檢核"
+      ];
+      const rows = items.map(it => {
+        const m = calcStrengthMetrics(it);
+        const wSpd = calcWalkSpeed(it);
+        return [
+          it.date, it.weekday, it.module, it.phase, it.name, it.basis,
+          it.baseKg, it.targetSets, it.targetReps, it.rest, it.rpe,
+          it.cues, it.muscles, it.video, it.addedWeight, it.unit,
+          it.actualSets, it.actualReps, m.effectiveKg, m.volumeKg,
+          it.walkKm, it.walkMin, wSpd,
+          it.cardioKm, it.cardioMin, it.cardioSpeed, it.cardioIncline, it.status
+        ];
+      });
+      return [headers, ...rows];
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    // Event Listeners Setup
+    document.addEventListener("DOMContentLoaded", () => {
+      loadState();
+      document.getElementById("gasCodeBlock").textContent = GAS_CODE_TEMPLATE;
+      renderScheduleView();
+      renderStarSelector();
+      renderMachineLibrary();
+
+      // Tab navigation
+      document.querySelectorAll(".nav-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+          document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+          tab.classList.add("active");
+          const targetId = tab.dataset.tab;
+          document.getElementById(targetId).classList.add("active");
+          if (targetId === "tab-overview") renderOverviewView();
+          if (targetId === "tab-machines") renderMachineLibrary();
+        });
+      });
+
+      // Machine Photo Input
+      document.getElementById("mPhotoInput").addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          currentFormPhoto = await compressImageFile(file);
+          document.getElementById("mPhotoPreview").src = currentFormPhoto;
+          document.getElementById("mPhotoPreviewWrap").style.display = "flex";
+        } catch (err) {
+          showToast("照片讀取失敗，請重試");
+        }
+      });
+
+      document.getElementById("mClearPhotoBtn").addEventListener("click", () => {
+        currentFormPhoto = "";
+        document.getElementById("mPhotoInput").value = "";
+        document.getElementById("mPhotoPreviewWrap").style.display = "none";
+      });
+
+      document.getElementById("mSaveBtn").addEventListener("click", () => {
+        const name = document.getElementById("mName").value.trim();
+        if (!name) {
+          showToast("請輸入器材名稱");
+          return;
+        }
+        const category = document.getElementById("mCategory").value;
+        const setup = document.getElementById("mSetup").value.trim();
+        const notes = document.getElementById("mNotes").value.trim();
+        const todayStr = new Date().toISOString().slice(0, 10).replace(/-/g, "/");
+
+        if (editingMachineId) {
+          const idx = machines.findIndex(x => x.id === editingMachineId);
+          if (idx !== -1) {
+            machines[idx] = { ...machines[idx], name, category, setup, notes, rating: currentFormRating, photo: currentFormPhoto };
+          }
+          showToast("已更新器械紀錄");
+        } else {
+          machines.unshift({
+            id: "mach_" + Date.now(),
+            date: todayStr,
+            name,
+            category,
+            setup,
+            notes,
+            rating: currentFormRating,
+            photo: currentFormPhoto
+          });
+          showToast("已新增至器械收藏庫");
+        }
+        saveState();
+        resetMachineForm();
+        renderMachineLibrary();
+      });
+
+      document.getElementById("mCancelEditBtn").addEventListener("click", resetMachineForm);
+
+      document.getElementById("copyMachinesBtn").addEventListener("click", () => {
+        if (machines.length === 0) {
+          showToast("目前尚未收藏任何器械");
+          return;
+        }
+        const lines = ["【我的健身工廠器械感受收藏庫】"];
+        machines.forEach((m, i) => {
+          lines.push(`${i + 1}. [${m.category}] ${m.name}（${m.rating}★）`);
+          if (m.setup) lines.push(`   - 座椅/設定：${m.setup}`);
+          if (m.notes) lines.push(`   - 發力筆記：${m.notes}`);
+        });
+        navigator.clipboard.writeText(lines.join("\n")).then(() => {
+          showToast("已複製清單，可直接貼給教練排課！");
+        });
+      });
+
+      // Modal close
+      document.getElementById("imgModal").addEventListener("click", () => {
+        document.getElementById("imgModal").classList.remove("open");
+      });
+
+      // Cloud Sync & Export
+      document.getElementById("saveGasUrlBtn").addEventListener("click", () => {
+        const url = document.getElementById("gasUrlInput").value.trim();
+        localStorage.setItem(STORAGE_KEY_GAS, url);
+        showToast("已儲存 Apps Script 網址");
+      });
+
+      document.getElementById("copyGasCodeBtn").addEventListener("click", () => {
+        navigator.clipboard.writeText(GAS_CODE_TEMPLATE).then(() => {
+          showToast("已複製 Apps Script 程式碼");
+        });
+      });
+
+      document.getElementById("pushCloudBtn").addEventListener("click", async () => {
+        const url = document.getElementById("gasUrlInput").value.trim();
+        if (!url) {
+          showToast("請先輸入並儲存 Google Apps Script 網址");
+          return;
+        }
+        const statusEl = document.getElementById("syncStatusMsg");
+        statusEl.textContent = "⏳ 正在上傳同步至 Google 試算表...";
+        try {
+          const payload = {
+            schedule: build28ColRows(),
+            machines: machines.map(({ photo, ...rest }) => rest)
+          };
+          await fetch(url, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+          });
+          statusEl.textContent = "✅ 已發送同步請求（69 列 × 28 欄 ＋ 器械庫），請至試算表確認更新。";
+          showToast("雲端同步請求已發送");
+        } catch (err) {
+          statusEl.textContent = "❌ 同步失敗：" + err.message;
+        }
+      });
+
+      document.getElementById("pullCloudBtn").addEventListener("click", async () => {
+        const url = document.getElementById("gasUrlInput").value.trim();
+        if (!url) {
+          showToast("請先輸入 Google Apps Script 網址");
+          return;
+        }
+        const statusEl = document.getElementById("syncStatusMsg");
+        statusEl.textContent = "⏳ 正在從 Google 試算表讀取資料...";
+        try {
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data && Array.isArray(data.schedule) && data.schedule.length > 1) {
+            const rows = data.schedule.slice(1);
+            rows.forEach((r, idx) => {
+              if (items[idx]) {
+                if (items[idx].rowType === "custom" || items[idx].rowType === "cardio") {
+                  items[idx].name = r[4] || "";
+                }
+                if (items[idx].rowType === "custom") {
+                  items[idx].cues = r[11] || "";
+                }
+                items[idx].basis = r[5] || items[idx].basis;
+                items[idx].baseKg = r[6] !== "" ? Number(r[6]) : 0;
+                items[idx].addedWeight = r[14] !== "" ? String(r[14]) : "";
+                items[idx].unit = r[15] || "KG";
+                items[idx].actualSets = r[16] !== "" ? String(r[16]) : "";
+                items[idx].actualReps = r[17] !== "" ? String(r[17]) : "";
+                items[idx].walkKm = r[20] !== "" ? String(r[20]) : "";
+                items[idx].walkMin = r[21] !== "" ? String(r[21]) : "";
+                items[idx].cardioKm = r[23] !== "" ? String(r[23]) : "";
+                items[idx].cardioMin = r[24] !== "" ? String(r[24]) : "";
+                items[idx].cardioSpeed = r[25] !== "" ? String(r[25]) : "";
+                items[idx].cardioIncline = r[26] !== "" ? String(r[26]) : "";
+                items[idx].status = r[27] || items[idx].status;
+              }
+            });
+            saveState();
+            renderScheduleView();
+            statusEl.textContent = "✅ 已成功從 Google 試算表載入最新紀錄！";
+            showToast("雲端資料載入完成");
+          } else {
+            statusEl.textContent = "⚠️ 試算表尚無有效資料列。";
+          }
+        } catch (err) {
+          statusEl.textContent = "❌ 讀取失敗（請確認 Apps Script 部署權限設為所有人）：" + err.message;
+        }
+      });
+
+      document.getElementById("exportCsvBtn").addEventListener("click", () => {
+        const rows = build28ColRows();
+        const csvText = "\uFEFF" + rows.map(r => r.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+        const blob = new Blob([csvText], { type: "text/csv;charset=utf-8;" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "每週訓練三軌追蹤_20261116_20261122.csv";
+        a.click();
+      });
+
+      document.getElementById("exportJsonBtn").addEventListener("click", () => {
+        const backup = { version: "v7", exportedAt: new Date().toISOString(), items, machines };
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "workout_tracker_backup.json";
+        a.click();
+      });
+
+      document.getElementById("importJsonInput").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const parsed = JSON.parse(ev.target.result);
+            if (Array.isArray(parsed.items)) items = parsed.items;
+            if (Array.isArray(parsed.machines)) machines = parsed.machines;
+            saveState();
+            renderScheduleView();
+            renderMachineLibrary();
+            showToast("✅ 已成功還原備份資料");
+          } catch (err) {
+            showToast("❌ JSON 檔案格式錯誤");
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      document.getElementById("resetAllBtn").addEventListener("click", () => {
+        if (!confirm("確定要清空本週所有重量、散步與有氧輸入紀錄嗎？（器械收藏庫會保留）")) return;
+        items = buildDefaultItems();
+        saveState();
+        renderScheduleView();
+        showToast("已重設本週訓練紀錄");
+      });
+    });
+  </script>
+</body>
+</html>
