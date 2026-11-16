@@ -340,8 +340,61 @@
       transition: border-color 0.15s ease;
     }
 
-    .ex-card.status-done {
+    .ex-card.status-done,
+    .ex-card.walk-card.status-done,
+    .ex-card.sport-card.status-done,
+    .ex-card.cardio-card.status-done,
+    .ex-card.custom-card.status-done {
+      background: #e5e7eb;
+      border-color: #cbd5e1;
       border-left: 5px solid var(--teal-600);
+      opacity: 0.8;
+    }
+
+    .ex-card.status-done .ex-name {
+      color: #475569;
+    }
+
+    .ex-card.status-done .meta-chip {
+      background: #cbd5e1;
+      color: #475569;
+    }
+
+    .ex-card.status-done .cue-box {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #64748b;
+    }
+
+    .ex-card.status-done .calc-strip {
+      background: #cbd5e1;
+      border-color: #94a3b8;
+      color: #334155;
+    }
+
+    .ex-card.status-done .ctrl-input:disabled,
+    .ex-card.status-done .ctrl-select:disabled,
+    .ex-card.status-done .unit-btn:disabled,
+    .ex-card.status-done .preset-pill:disabled,
+    .ex-card.status-done .btn:disabled {
+      background: #cbd5e1 !important;
+      border-color: #94a3b8 !important;
+      color: #475569 !important;
+      -webkit-text-fill-color: #475569;
+      cursor: not-allowed;
+      opacity: 0.88;
+    }
+
+    .lock-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      color: #334155;
+      margin-left: 4px;
+      vertical-align: middle;
     }
 
     .ex-card.status-skip {
@@ -1549,16 +1602,17 @@
       // Section 1: Walk
       html += `<div class="track-section-hdr walk-hdr"><span>🚶 軌道一｜午間日常散步 (NEAT)</span><span>獨立累計・不混入重訓</span></div>`;
       walkItems.forEach(it => {
+        const isDone = it.status === "✅ 已完成";
         const speed = calcWalkSpeed(it);
         const isSlowDay = (it.date === "2026/11/18");
         const speedWarn = isSlowDay && speed > 4.5
           ? `<div class="warn-banner">⚠️ 今日建議控速 ≤ 4.5 km/h（目前 ${speed} km/h），請放慢步速以利腿後肌群修復。</div>`
           : "";
         html += `
-          <div class="ex-card walk-card ${it.status === "✅ 已完成" ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
+          <div class="ex-card walk-card ${isDone ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
             <div class="card-top-row">
               <div>
-                <span class="phase-badge walk">${it.phase}</span>
+                <span class="phase-badge walk">${it.phase}</span>${isDone ? '<span class="lock-badge">🔒 已鎖定</span>' : ""}
                 <h3 class="ex-name">${it.name}</h3>
               </div>
               <select class="status-select ${statusClass(it.status)}" data-field="status">
@@ -1575,11 +1629,11 @@
             <div class="input-grid">
               <div class="field-group">
                 <label>散步距離 (km)</label>
-                <input type="number" step="0.01" min="0" class="ctrl-input" data-field="walkKm" value="${it.walkKm}" placeholder="例：3.2" />
+                <input type="number" step="0.01" min="0" class="ctrl-input" data-field="walkKm" value="${it.walkKm}" placeholder="例：3.2" ${isDone ? "disabled" : ""} />
               </div>
               <div class="field-group">
                 <label>散步時長 (分鐘)</label>
-                <input type="number" step="1" min="0" class="ctrl-input" data-field="walkMin" value="${it.walkMin}" placeholder="例：40" />
+                <input type="number" step="1" min="0" class="ctrl-input" data-field="walkMin" value="${it.walkMin}" placeholder="例：40" ${isDone ? "disabled" : ""} />
               </div>
             </div>
             <div class="calc-strip walk-calc">
@@ -1595,6 +1649,7 @@
       if (sportItems.length > 0) {
         html += `<div class="track-section-hdr sport-hdr"><span>⌚ 專項運動與課程（COROS 概要數據 6 格）</span><span>直接對齊手錶數據・無需填 RPE</span></div>`;
         sportItems.forEach(it => {
+          const isDone = it.status === "✅ 已完成";
           const ytHtml = it.video
             ? `<a href="${it.video}" target="_blank" rel="noopener noreferrer" class="yt-btn">▶ 觀看場上步法與熱身參考</a>`
             : "";
@@ -1607,11 +1662,11 @@
           const anaeroVal = it.sportAnaerobicTe !== "" ? it.sportAnaerobicTe : "-";
 
           html += `
-            <div class="ex-card sport-card ${it.status === "✅ 已完成" ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
+            <div class="ex-card sport-card ${isDone ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
               <div class="card-top-row">
                 <div style="flex:1;">
-                  <span class="phase-badge sport">${it.phase}</span>
-                  <input type="text" class="ctrl-input" data-field="name" value="${escapeHtml(it.name)}" style="margin-top:4px; font-weight:700;" />
+                  <span class="phase-badge sport">${it.phase}</span>${isDone ? '<span class="lock-badge">🔒 已鎖定</span>' : ""}
+                  <input type="text" class="ctrl-input" data-field="name" value="${escapeHtml(it.name)}" style="margin-top:4px; font-weight:700;" ${isDone ? "disabled" : ""} />
                 </div>
                 <select class="status-select ${statusClass(it.status)}" data-field="status">
                   <option value="⬜ 待完成" ${it.status === "⬜ 待完成" ? "selected" : ""}>⬜ 待完成</option>
@@ -1627,32 +1682,32 @@
               <div class="input-grid-3">
                 <div class="field-group">
                   <label>運動時間 (分鐘)</label>
-                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportMin" value="${it.sportMin}" placeholder="例：61" />
+                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportMin" value="${it.sportMin}" placeholder="例：61" ${isDone ? "disabled" : ""} />
                 </div>
                 <div class="field-group">
                   <label>平均心率 (bpm)</label>
-                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportAvgHr" value="${it.sportAvgHr}" placeholder="例：142" />
+                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportAvgHr" value="${it.sportAvgHr}" placeholder="例：142" ${isDone ? "disabled" : ""} />
                 </div>
                 <div class="field-group">
                   <label>卡路里 (kcal)</label>
-                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportKcal" value="${it.sportKcal}" placeholder="例：742" />
+                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportKcal" value="${it.sportKcal}" placeholder="例：742" ${isDone ? "disabled" : ""} />
                 </div>
                 <div class="field-group">
                   <label>訓練負荷 (TL)</label>
-                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportLoad" value="${it.sportLoad}" placeholder="例：117" />
+                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportLoad" value="${it.sportLoad}" placeholder="例：117" ${isDone ? "disabled" : ""} />
                 </div>
                 <div class="field-group">
                   <label>有氧效果 (TE)</label>
-                  <input type="number" step="0.1" min="0" max="5" class="ctrl-input" data-field="sportAerobicTe" value="${it.sportAerobicTe}" placeholder="例：3.1" />
+                  <input type="number" step="0.1" min="0" max="5" class="ctrl-input" data-field="sportAerobicTe" value="${it.sportAerobicTe}" placeholder="例：3.1" ${isDone ? "disabled" : ""} />
                 </div>
                 <div class="field-group">
                   <label>無氧效果 (TE)</label>
-                  <input type="number" step="0.1" min="0" max="5" class="ctrl-input" data-field="sportAnaerobicTe" value="${it.sportAnaerobicTe}" placeholder="例：0.9" />
+                  <input type="number" step="0.1" min="0" max="5" class="ctrl-input" data-field="sportAnaerobicTe" value="${it.sportAnaerobicTe}" placeholder="例：0.9" ${isDone ? "disabled" : ""} />
                 </div>
               </div>
               <div class="field-group" style="margin-top:8px;">
                 <label>課程內容與備註（選填）</label>
-                <input type="text" class="ctrl-input" data-field="sportNotes" value="${escapeHtml(it.sportNotes)}" placeholder="選填：當日課程內容或身體感受" />
+                <input type="text" class="ctrl-input" data-field="sportNotes" value="${escapeHtml(it.sportNotes)}" placeholder="選填：當日課程內容或身體感受" ${isDone ? "disabled" : ""} />
               </div>
               <div class="calc-strip sport-calc">
                 <span>${minVal} 分｜均心率 ${hrVal || "-"} bpm｜${kcalVal || "-"} kcal</span>
@@ -1666,16 +1721,17 @@
       // Section 2: Strength
       html += `<div class="track-section-hdr strength-hdr"><span>🏋️ 軌道二｜重訓主課表與體態矯正動作</span><span>純文字休息提示・無計時器</span></div>`;
       strengthItems.forEach(it => {
+        const isDone = it.status === "✅ 已完成";
         const m = calcStrengthMetrics(it);
         const isBodyweight = it.basis === "自重 / 彈力帶";
         const ytHtml = it.video
           ? `<a href="${it.video}" target="_blank" rel="noopener noreferrer" class="yt-btn">▶ 觀看動作示範短片</a>`
           : "";
         html += `
-          <div class="ex-card ${it.status === "✅ 已完成" ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
+          <div class="ex-card ${isDone ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
             <div class="card-top-row">
               <div>
-                <span class="phase-badge">${it.phase}</span>
+                <span class="phase-badge">${it.phase}</span>${isDone ? '<span class="lock-badge">🔒 已鎖定</span>' : ""}
                 <h3 class="ex-name">${it.name}</h3>
               </div>
               <select class="status-select ${statusClass(it.status)}" data-field="status">
@@ -1697,7 +1753,7 @@
             <div class="input-grid">
               <div class="field-group">
                 <label>計量基準</label>
-                <select class="ctrl-select" data-field="basis">
+                <select class="ctrl-select" data-field="basis" ${isDone ? "disabled" : ""}>
                   <option value="總重 (含槓/機重)" ${it.basis === "總重 (含槓/機重)" ? "selected" : ""}>總重 (含槓/機重)</option>
                   <option value="單邊計重 (×2)" ${it.basis === "單邊計重 (×2)" ? "selected" : ""}>單邊計重 (×2)</option>
                   <option value="單支啞鈴 (×2)" ${it.basis === "單支啞鈴 (×2)" ? "selected" : ""}>單支啞鈴 (×2)</option>
@@ -1706,22 +1762,22 @@
               </div>
               <div class="field-group">
                 <label>空槓/機台重 (kg)</label>
-                <input type="number" step="0.5" min="0" class="ctrl-input" data-field="baseKg" value="${it.baseKg}" ${isBodyweight ? "disabled" : ""} />
+                <input type="number" step="0.5" min="0" class="ctrl-input" data-field="baseKg" value="${it.baseKg}" ${isBodyweight || isDone ? "disabled" : ""} />
               </div>
               <div class="field-group">
                 <label>外加/手持重量</label>
                 <div class="weight-unit-row">
-                  <input type="number" step="0.5" min="0" class="ctrl-input" data-field="addedWeight" value="${it.addedWeight}" placeholder="${isBodyweight ? "自重" : "空槓填0"}" ${isBodyweight ? "disabled" : ""} />
-                  <button type="button" class="unit-btn ${it.unit === "LB" ? "lb" : ""}" data-action="toggleUnit" ${isBodyweight ? "disabled" : ""}>${it.unit}</button>
+                  <input type="number" step="0.5" min="0" class="ctrl-input" data-field="addedWeight" value="${it.addedWeight}" placeholder="${isBodyweight ? "自重" : "空槓填0"}" ${isBodyweight || isDone ? "disabled" : ""} />
+                  <button type="button" class="unit-btn ${it.unit === "LB" ? "lb" : ""}" data-action="toggleUnit" ${isBodyweight || isDone ? "disabled" : ""}>${it.unit}</button>
                 </div>
               </div>
               <div class="field-group">
                 <label>實際組數</label>
-                <input type="number" step="1" min="0" class="ctrl-input" data-field="actualSets" value="${it.actualSets}" placeholder="${it.targetSets || 3}" />
+                <input type="number" step="1" min="0" class="ctrl-input" data-field="actualSets" value="${it.actualSets}" placeholder="${it.targetSets || 3}" ${isDone ? "disabled" : ""} />
               </div>
               <div class="field-group">
                 <label>實際次數 (單組)</label>
-                <input type="number" step="1" min="0" class="ctrl-input" data-field="actualReps" value="${it.actualReps}" placeholder="10" />
+                <input type="number" step="1" min="0" class="ctrl-input" data-field="actualReps" value="${it.actualReps}" placeholder="10" ${isDone ? "disabled" : ""} />
               </div>
             </div>
             <div class="calc-strip">
@@ -1735,14 +1791,15 @@
       // Section 3: 3 Custom Slots
       html += `<div class="track-section-hdr custom-hdr"><span>紫框自由填寫區｜自訂加練 / 器材排隊替代槽（3 格）</span><span>名稱空白不計入完成率</span></div>`;
       customItems.forEach((it, idx) => {
+        const isDone = it.status === "✅ 已完成";
         const m = calcStrengthMetrics(it);
         const isBodyweight = it.basis === "自重 / 彈力帶";
         html += `
-          <div class="ex-card custom-card ${it.status === "✅ 已完成" ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
+          <div class="ex-card custom-card ${isDone ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
             <div class="card-top-row">
               <div style="flex:1;">
-                <span class="phase-badge custom">自訂加練 / 替代 ${idx + 1}</span>
-                <input type="text" class="ctrl-input" data-field="name" value="${escapeHtml(it.name)}" placeholder="輸入自訂動作名稱（例：坐姿推胸機），留白不計分" style="margin-top:4px; font-weight:700;" />
+                <span class="phase-badge custom">自訂加練 / 替代 ${idx + 1}</span>${isDone ? '<span class="lock-badge">🔒 已鎖定</span>' : ""}
+                <input type="text" class="ctrl-input" data-field="name" value="${escapeHtml(it.name)}" placeholder="輸入自訂動作名稱（例：坐姿推胸機），留白不計分" style="margin-top:4px; font-weight:700;" ${isDone ? "disabled" : ""} />
               </div>
               <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-end;">
                 <select class="status-select ${statusClass(it.status)}" data-field="status">
@@ -1750,17 +1807,17 @@
                   <option value="✅ 已完成" ${it.status === "✅ 已完成" ? "selected" : ""}>✅ 已完成</option>
                   <option value="⏭️ 略過/調整" ${it.status === "⏭️ 略過/調整" ? "selected" : ""}>⏭️ 略過/調整</option>
                 </select>
-                <button type="button" class="btn btn-outline btn-sm" data-action="clearCustom">清空此格</button>
+                <button type="button" class="btn btn-outline btn-sm" data-action="clearCustom" ${isDone ? "disabled" : ""}>清空此格</button>
               </div>
             </div>
             <div class="field-group" style="margin-bottom:8px;">
               <label>個人筆記 / 座椅設定</label>
-              <input type="text" class="ctrl-input" data-field="cues" value="${escapeHtml(it.cues)}" placeholder="選填：椅墊高度、發力感受或替代原因" />
+              <input type="text" class="ctrl-input" data-field="cues" value="${escapeHtml(it.cues)}" placeholder="選填：椅墊高度、發力感受或替代原因" ${isDone ? "disabled" : ""} />
             </div>
             <div class="input-grid">
               <div class="field-group">
                 <label>計量基準</label>
-                <select class="ctrl-select" data-field="basis">
+                <select class="ctrl-select" data-field="basis" ${isDone ? "disabled" : ""}>
                   <option value="總重 (含槓/機重)" ${it.basis === "總重 (含槓/機重)" ? "selected" : ""}>總重 (含槓/機重)</option>
                   <option value="單邊計重 (×2)" ${it.basis === "單邊計重 (×2)" ? "selected" : ""}>單邊計重 (×2)</option>
                   <option value="單支啞鈴 (×2)" ${it.basis === "單支啞鈴 (×2)" ? "selected" : ""}>單支啞鈴 (×2)</option>
@@ -1769,22 +1826,22 @@
               </div>
               <div class="field-group">
                 <label>空槓/機台重 (kg)</label>
-                <input type="number" step="0.5" min="0" class="ctrl-input" data-field="baseKg" value="${it.baseKg}" ${isBodyweight ? "disabled" : ""} />
+                <input type="number" step="0.5" min="0" class="ctrl-input" data-field="baseKg" value="${it.baseKg}" ${isBodyweight || isDone ? "disabled" : ""} />
               </div>
               <div class="field-group">
                 <label>外加/手持重量</label>
                 <div class="weight-unit-row">
-                  <input type="number" step="0.5" min="0" class="ctrl-input" data-field="addedWeight" value="${it.addedWeight}" placeholder="重量" ${isBodyweight ? "disabled" : ""} />
-                  <button type="button" class="unit-btn ${it.unit === "LB" ? "lb" : ""}" data-action="toggleUnit" ${isBodyweight ? "disabled" : ""}>${it.unit}</button>
+                  <input type="number" step="0.5" min="0" class="ctrl-input" data-field="addedWeight" value="${it.addedWeight}" placeholder="重量" ${isBodyweight || isDone ? "disabled" : ""} />
+                  <button type="button" class="unit-btn ${it.unit === "LB" ? "lb" : ""}" data-action="toggleUnit" ${isBodyweight || isDone ? "disabled" : ""}>${it.unit}</button>
                 </div>
               </div>
               <div class="field-group">
                 <label>實際組數</label>
-                <input type="number" step="1" min="0" class="ctrl-input" data-field="actualSets" value="${it.actualSets}" placeholder="3" />
+                <input type="number" step="1" min="0" class="ctrl-input" data-field="actualSets" value="${it.actualSets}" placeholder="3" ${isDone ? "disabled" : ""} />
               </div>
               <div class="field-group">
                 <label>實際次數 (單組)</label>
-                <input type="number" step="1" min="0" class="ctrl-input" data-field="actualReps" value="${it.actualReps}" placeholder="12" />
+                <input type="number" step="1" min="0" class="ctrl-input" data-field="actualReps" value="${it.actualReps}" placeholder="12" ${isDone ? "disabled" : ""} />
               </div>
             </div>
             <div class="calc-strip">
@@ -1798,16 +1855,17 @@
       // Section 4: Cardio
       html += `<div class="track-section-hdr cardio-hdr"><span>🏃 軌道三｜每日跑步機／有氧紀錄（選填・未做不扣分）</span><span>爬坡 / 跑步 / 速度 / 坡度</span></div>`;
       cardioItems.forEach(it => {
+        const isDone = it.status === "✅ 已完成";
         const inc = parseFloat(it.cardioIncline) || 0;
         const incWarn = inc >= 8
           ? `<div class="warn-banner">⚠️ 高坡度提醒（${inc}%）：嚴禁雙手緊抓扶手身體後仰，請維持肋骨下沉、核心微收與臀腿主動推蹬。</div>`
           : "";
         html += `
-          <div class="ex-card cardio-card ${it.status === "✅ 已完成" ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
+          <div class="ex-card cardio-card ${isDone ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
             <div class="card-top-row">
               <div style="flex:1;">
-                <span class="phase-badge cardio">${it.phase}</span>
-                <input type="text" class="ctrl-input" data-field="name" value="${escapeHtml(it.name)}" style="margin-top:4px; font-weight:700;" />
+                <span class="phase-badge cardio">${it.phase}</span>${isDone ? '<span class="lock-badge">🔒 已鎖定</span>' : ""}
+                <input type="text" class="ctrl-input" data-field="name" value="${escapeHtml(it.name)}" style="margin-top:4px; font-weight:700;" ${isDone ? "disabled" : ""} />
               </div>
               <select class="status-select ${statusClass(it.status)}" data-field="status">
                 <option value="➖ 今日無有氧" ${it.status === "➖ 今日無有氧" ? "selected" : ""}>➖ 今日無有氧</option>
@@ -1816,28 +1874,28 @@
               </select>
             </div>
             <div class="preset-pills">
-              <button type="button" class="preset-pill" data-preset="跑步機爬坡">⛰️ 跑步機爬坡</button>
-              <button type="button" class="preset-pill" data-preset="跑步機慢跑">🏃 跑步機慢跑</button>
-              <button type="button" class="preset-pill" data-preset="戶外跑步">🌳 戶外跑步</button>
-              <button type="button" class="preset-pill" data-preset="滑步機 / 飛輪">🚴 滑步機 / 飛輪</button>
+              <button type="button" class="preset-pill" data-preset="跑步機爬坡" ${isDone ? "disabled" : ""}>⛰️ 跑步機爬坡</button>
+              <button type="button" class="preset-pill" data-preset="跑步機慢跑" ${isDone ? "disabled" : ""}>🏃 跑步機慢跑</button>
+              <button type="button" class="preset-pill" data-preset="戶外跑步" ${isDone ? "disabled" : ""}>🌳 戶外跑步</button>
+              <button type="button" class="preset-pill" data-preset="滑步機 / 飛輪" ${isDone ? "disabled" : ""}>🚴 滑步機 / 飛輪</button>
             </div>
             <div class="cue-box">${it.cues}</div>
             <div class="input-grid">
               <div class="field-group">
                 <label>有氧距離 (km)</label>
-                <input type="number" step="0.01" min="0" class="ctrl-input" data-field="cardioKm" value="${it.cardioKm}" placeholder="例：2.5" />
+                <input type="number" step="0.01" min="0" class="ctrl-input" data-field="cardioKm" value="${it.cardioKm}" placeholder="例：2.5" ${isDone ? "disabled" : ""} />
               </div>
               <div class="field-group">
                 <label>有氧時長 (分鐘)</label>
-                <input type="number" step="1" min="0" class="ctrl-input" data-field="cardioMin" value="${it.cardioMin}" placeholder="例：25" />
+                <input type="number" step="1" min="0" class="ctrl-input" data-field="cardioMin" value="${it.cardioMin}" placeholder="例：25" ${isDone ? "disabled" : ""} />
               </div>
               <div class="field-group">
                 <label>設定速度 (km/h)</label>
-                <input type="number" step="0.1" min="0" class="ctrl-input" data-field="cardioSpeed" value="${it.cardioSpeed}" placeholder="例：5.2" />
+                <input type="number" step="0.1" min="0" class="ctrl-input" data-field="cardioSpeed" value="${it.cardioSpeed}" placeholder="例：5.2" ${isDone ? "disabled" : ""} />
               </div>
               <div class="field-group">
                 <label>設定坡度 (%)</label>
-                <input type="number" step="0.5" min="0" class="ctrl-input" data-field="cardioIncline" value="${it.cardioIncline}" placeholder="例：8.0" />
+                <input type="number" step="0.5" min="0" class="ctrl-input" data-field="cardioIncline" value="${it.cardioIncline}" placeholder="例：8.0" ${isDone ? "disabled" : ""} />
               </div>
             </div>
             <div class="calc-strip cardio-calc">
@@ -1963,7 +2021,6 @@
         if (statusSel && statusSel.value !== item.status) {
           statusSel.value = item.status;
           statusSel.className = "status-select " + statusClass(item.status);
-          if (item.status === "✅ 已完成") card.classList.add("status-done");
         }
       } else if (item.rowType === "cardio") {
         const inc = parseFloat(item.cardioIncline) || 0;
@@ -2563,7 +2620,7 @@ function doPost(e) {
       });
 
       document.getElementById("exportJsonBtn").addEventListener("click", () => {
-        const backup = { version: "v13", exportedAt: new Date().toISOString(), items, machines };
+        const backup = { version: "v14", exportedAt: new Date().toISOString(), items, machines };
         const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
