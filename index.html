@@ -502,6 +502,19 @@
       align-items: end;
     }
 
+    .input-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      align-items: end;
+    }
+
+    @media (max-width: 520px) {
+      .input-grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
     .field-group {
       display: flex;
       flex-direction: column;
@@ -735,7 +748,7 @@
 
     .bar-row {
       display: grid;
-      grid-template-columns: 74px 1fr 112px;
+      grid-template-columns: 74px 1fr 116px;
       align-items: center;
       gap: 8px;
       margin-bottom: 8px;
@@ -767,7 +780,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 0.8rem;
-      min-width: 720px;
+      min-width: 740px;
     }
 
     table.summary-tbl th {
@@ -897,7 +910,7 @@
     <div class="header-top">
       <div>
         <h1 class="app-title">每週訓練菜單與三軌追蹤系統</h1>
-        <p class="app-subtitle">2026/11/12（週四）– 2026/11/18（週三）｜重訓 × 散步 × 專項運動</p>
+        <p class="app-subtitle">2026/11/12（週四）– 2026/11/18（週三）｜重訓 × 散步 × COROS 專項</p>
       </div>
       <span class="save-indicator" id="saveStatus">本機已儲存</span>
     </div>
@@ -1002,7 +1015,7 @@
       <div class="panel-card">
         <h2 class="panel-title">力學矯正與三軌計量檢核重點</h2>
         <ul style="margin:0; padding-left:18px; font-size:0.84rem; color:#334155; display:flex; flex-direction:column; gap:6px;">
-          <li><strong>專項運動追蹤（週五羽球、週日 HYROX）：</strong>統一採用「總時長（分鐘）＋平均心率（bpm）＋動態熱量（kcal）＋RPE」紀錄，直接對齊 COROS 手錶課後摘要。</li>
+          <li><strong>COROS 專項運動對齊（週五羽球、週日 HYROX）：</strong>完全對應 COROS Training Hub 概要數據 6 欄位（運動時間、平均心率、卡路里、訓練負荷、有氧效果、無氧效果），免填 RPE。</li>
           <li><strong>純空槓計量規則：</strong>使用 20 kg 空槓臥推或深蹲時，計量基準選「總重 (含槓/機重)」、空槓重填 <code>20</code>、外加重量務必填 <code>0</code>（不可留白），系統即會納入 20 kg 計算總容量。</li>
           <li><strong>壺鈴農夫走路（HARCO 比賽專項）：</strong>雙手各提一顆壺鈴時，填入「單顆壺鈴重量」並選「單支啞鈴 (×2)」，系統自動乘以 2 顆計入有效負重。</li>
           <li><strong>午間散步控速鐵律：</strong>週三（11/18 腿後 DOMS 高峰）午間散步時速請控制在 <code>≤ 4.5 km/h</code>，純促進下肢血液回流而不消耗肌醣原。</li>
@@ -1015,7 +1028,7 @@
       <div class="panel-card">
         <h2 class="panel-title">☁️ Google 試算表雙向同步設定（69 列 × 28 欄 A–AB）</h2>
         <p style="font-size:0.83rem; color:#475569; margin-top:0;">
-          沿用你已綁定的 Google Apps Script 網址即可直接同步（專項運動的時長、心率與熱量會自動對應寫入試算表）。
+          沿用你已綁定的 Google Apps Script 網址即可直接同步（COROS 運動時間、平均心率、卡路里、訓練負荷與有氧/無氧效果會自動寫入試算表）。
         </p>
         <div class="field-group">
           <label>Google Apps Script 部署網址（Web App URL）</label>
@@ -1089,18 +1102,18 @@
       { date: "2026/11/12", rowType: "strength", phase: "核心收尾", name: "機械坐姿捲腹機 (Ab Crunch Machine)", basis: "總重 (含槓/機重)", baseKg: 0, targetSets: 3, targetReps: "12–15 下", rest: "60 秒", rpe: "RPE 8", cues: "直接填插銷數字（磅數選 LB）。吐氣時用上腹帶動胸廓向下捲曲，直接訓練肋骨下沉並改善骨盆前傾。", muscles: "腹直肌、深層核心穩定", video: "http://www.youtube.com/watch?v=yln2pdt0cKM" },
       { date: "2026/11/12", rowType: "strength", phase: "訓後伸展", name: "靠牆單臂胸大肌伸展", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 2, targetReps: "30 秒/側", rest: "-", rpe: "自重", cues: "前臂貼牆呈 90 度，身體微向前轉開胸大肌，避免練胸後緊繃加重含胸。", muscles: "胸大肌、胸小肌伸展", video: "http://www.youtube.com/watch?v=4I2zlJyljHU" },
 
-      // 週五 2026/11/13
+      // 週五 2026/11/13（COROS 概要數據直接對應）
       { date: "2026/11/13", rowType: "walk", phase: "午間散步 (NEAT)", name: "午間輕鬆保留體力散步", basis: "步行紀錄 (KM/分)", baseKg: 0, targetSets: 0, targetReps: "25–35 分鐘 (約 2.0–2.8 km)", rest: "-", rpe: "自然步速 4.5–5.2 km/h", cues: "晚間羽球為新手娛樂強度，午間維持自然舒適步速累積日常活動量即可。", muscles: "賽前下肢活絡、日常活動消耗 (NEAT)", video: "http://www.youtube.com/watch?v=drObrz2eerA" },
       { date: "2026/11/13", rowType: "strength", phase: "賽前熱身", name: "踝關節推牆 ＋ 髖關節旋轉 ＋ 肩袖外旋啟動", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 1, targetReps: "10 分鐘", rest: "-", rpe: "自重/彈力帶", cues: "充分喚醒腳踝避震活動度與肩袖外旋穩定度，預防急停跨步扭傷。", muscles: "全身動態熱身、肩袖外旋肌群", video: "http://www.youtube.com/watch?v=rPtSCFB-vVQ" },
-      { date: "2026/11/13", rowType: "sport", phase: "專項運動 (時長/心率)", name: "晚間羽球專項對打與場上移動", basis: "專項運動 (時長/心率)", baseKg: 0, targetSets: 0, targetReps: "約 90–120 分鐘", rest: "-", rpe: "新手娛樂／心肺協調", cues: "免填組數與次數，直接填寫「總運動時長（分鐘）」與手錶的「平均心率（bpm）」、「動態熱量（kcal）」即可。", muscles: "全身爆發力、心肺耐力、側向敏捷", video: "http://www.youtube.com/watch?v=BbvfSeGMCMU" },
+      { date: "2026/11/13", rowType: "sport", phase: "COROS 專項運動", name: "晚間羽球專項對打與場上移動", basis: "COROS 生理數據", baseKg: 0, targetSets: 0, targetReps: "依 COROS 運動時間紀錄", rest: "-", rpe: "COROS 概要數據", cues: "直接抄寫 COROS Training Hub 右側「概要數據」6 格（運動時間取整數分鐘、平均心率、卡路里、訓練負荷、有氧效果、無氧效果），不需填 RPE。", muscles: "全身爆發力、心肺耐力、側向敏捷", video: "http://www.youtube.com/watch?v=BbvfSeGMCMU" },
 
       // 週六 2026/11/14
       { date: "2026/11/14", rowType: "walk", phase: "午間散步 (NEAT)", name: "午間戶外/日常恢復散步", basis: "步行紀錄 (KM/分)", baseKg: 0, targetSets: 0, targetReps: "30–40 分鐘 (約 2.5–3.2 km)", rest: "-", rpe: "輕鬆步速 4.5–5.0 km/h", cues: "排除週五羽球累積代謝疲勞（若週末無固定走可下拉選「⏭️ 略過/調整」）。", muscles: "主動心肺恢復、代謝排除", video: "http://www.youtube.com/watch?v=drObrz2eerA" },
       { date: "2026/11/14", rowType: "strength", phase: "主動恢復", name: "上背胸椎滾筒伸展", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 1, targetReps: "10–15 分鐘", rest: "-", rpe: "低強度", cues: "滾筒僅滾壓上背胸椎段打開含胸（嚴禁直接滾壓下背腰椎）。", muscles: "胸椎活動度、上背筋膜放鬆", video: "http://www.youtube.com/watch?v=xrLSl1nsnx8" },
 
-      // 週日 2026/11/15（與羽球統一為時長/心率/熱量）
+      // 週日 2026/11/15（COROS 概要數據直接對應）
       { date: "2026/11/15", rowType: "walk", phase: "午間散步 (NEAT)", name: "午間日常恢復散步", basis: "步行紀錄 (KM/分)", baseKg: 0, targetSets: 0, targetReps: "25–35 分鐘 (約 2.0–2.8 km)", rest: "-", rpe: "輕鬆步速 4.5–5.0 km/h", cues: "週日有 HYROX 課程，散步維持輕鬆步速即可（若未走可選「⏭️ 略過/調整」）。", muscles: "日常活動消耗 (NEAT)", video: "http://www.youtube.com/watch?v=drObrz2eerA" },
-      { date: "2026/11/15", rowType: "sport", phase: "專項運動 (時長/心率)", name: "HYROX 混合體能課程", basis: "專項運動 (時長/心率)", baseKg: 0, targetSets: 0, targetReps: "約 50–60 分鐘", rest: "-", rpe: "混合心肺耐力", cues: "同羽球紀錄方式，直接填寫手錶的「總運動時長（分鐘）」、「平均心率（bpm）」、「動態熱量（kcal）」與主觀疲勞 RPE 即可。", muscles: "全身肌耐力、心肺耐力", video: "" },
+      { date: "2026/11/15", rowType: "sport", phase: "COROS 專項運動", name: "HYROX 混合體能課程", basis: "COROS 生理數據", baseKg: 0, targetSets: 0, targetReps: "依 COROS 運動時間紀錄", rest: "-", rpe: "COROS 概要數據", cues: "直接抄寫 COROS Training Hub 右側「概要數據」6 格（運動時間、平均心率、卡路里、訓練負荷、有氧效果、無氧效果），不需填 RPE。", muscles: "全身肌耐力、心肺耐力", video: "" },
       { date: "2026/11/15", rowType: "strength", phase: "靜態伸展", name: "股四頭肌、小腿與胸大肌靜態拉伸", basis: "自重 / 彈力帶", baseKg: 0, targetSets: 1, targetReps: "15–20 分鐘", rest: "-", rpe: "自重", cues: "課後恢復下肢與胸肩肌肉彈性，補充足夠水分與碳水，準備迎接週一拉日。", muscles: "下肢肌群、胸肩肌群彈性恢復", video: "http://www.youtube.com/watch?v=3J_f13vo1FM" },
 
       // 週一 2026/11/16（今天）
@@ -1169,7 +1182,9 @@
             sportMin: "",
             sportAvgHr: "",
             sportKcal: "",
-            sportRpe: "",
+            sportLoad: "",
+            sportAerobicTe: "",
+            sportAnaerobicTe: "",
             sportNotes: "",
             status: "⬜ 待完成"
           });
@@ -1207,7 +1222,9 @@
             sportMin: "",
             sportAvgHr: "",
             sportKcal: "",
-            sportRpe: "",
+            sportLoad: "",
+            sportAerobicTe: "",
+            sportAnaerobicTe: "",
             sportNotes: "",
             status: "⬜ 待完成"
           });
@@ -1244,7 +1261,9 @@
           sportMin: "",
           sportAvgHr: "",
           sportKcal: "",
-          sportRpe: "",
+          sportLoad: "",
+          sportAerobicTe: "",
+          sportAnaerobicTe: "",
           sportNotes: "",
           status: "➖ 今日無有氧"
         });
@@ -1276,7 +1295,7 @@
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS) || "null");
         if (Array.isArray(saved) && saved.length > 0) {
           items = defaultList.map((def) => {
-            const old = saved.find(s => s.date === def.date && s.phase === def.phase)
+            const old = saved.find(s => s.date === def.date && s.rowType === def.rowType && (def.rowType === "sport" || s.phase === def.phase))
                      || saved.find(s => s.weekday === def.weekday && s.phase === def.phase)
                      || {};
             return {
@@ -1300,7 +1319,9 @@
               sportMin: old.sportMin !== undefined ? old.sportMin : "",
               sportAvgHr: old.sportAvgHr !== undefined ? old.sportAvgHr : "",
               sportKcal: old.sportKcal !== undefined ? old.sportKcal : "",
-              sportRpe: old.sportRpe !== undefined ? old.sportRpe : "",
+              sportLoad: old.sportLoad !== undefined ? old.sportLoad : "",
+              sportAerobicTe: old.sportAerobicTe !== undefined ? old.sportAerobicTe : "",
+              sportAnaerobicTe: old.sportAnaerobicTe !== undefined ? old.sportAnaerobicTe : "",
               sportNotes: old.sportNotes !== undefined ? old.sportNotes : "",
               status: old.status || def.status
             };
@@ -1387,6 +1408,7 @@
       let sportMin = 0;
       let sportKcal = 0;
       let sportAvgHr = 0;
+      let sportLoad = 0;
 
       dayItems.forEach(it => {
         const isBlankCustom = it.rowType === "custom" && String(it.name || "").trim() === "";
@@ -1413,6 +1435,7 @@
           sportMin += parseFloat(it.sportMin) || 0;
           sportKcal += parseFloat(it.sportKcal) || 0;
           sportAvgHr = parseFloat(it.sportAvgHr) || 0;
+          sportLoad += parseFloat(it.sportLoad) || 0;
         }
       });
 
@@ -1433,7 +1456,8 @@
         cardioDone,
         sportMin: Math.round(sportMin),
         sportKcal: Math.round(sportKcal),
-        sportAvgHr
+        sportAvgHr,
+        sportLoad: Math.round(sportLoad)
       };
     }
 
@@ -1466,9 +1490,10 @@
       const box = document.getElementById("daySummaryCard");
 
       let track3Text = "今日無有氧（未做不扣分）";
-      if (st.sportMin > 0 || st.sportAvgHr > 0 || st.sportKcal > 0) {
+      if (st.sportMin > 0 || st.sportAvgHr > 0 || st.sportKcal > 0 || st.sportLoad > 0) {
         const parts = [`${st.sportMin} 分`];
-        if (st.sportAvgHr > 0) parts.push(`均心率 ${st.sportAvgHr} bpm`);
+        if (st.sportAvgHr > 0) parts.push(`均心率 ${st.sportAvgHr}`);
+        if (st.sportLoad > 0) parts.push(`負荷 ${st.sportLoad}`);
         if (st.sportKcal > 0) parts.push(`${st.sportKcal} kcal`);
         track3Text = parts.join("｜");
       } else if (st.cardioDone || st.cardioKm > 0 || st.cardioMin > 0) {
@@ -1490,7 +1515,7 @@
             <span class="val">${st.walkKm} km｜${st.walkMin} 分（${st.walkSpeed} km/h）</span>
           </div>
           <div class="mini-box cardio">
-            <span class="lbl">🏸 軌道三｜專項課程 / 有氧</span>
+            <span class="lbl">⌚ 軌道三｜COROS 專項 / 有氧</span>
             <span class="val">${track3Text}</span>
           </div>
         </div>
@@ -1563,9 +1588,9 @@
         `;
       });
 
-      // Section 1.5: Sport / Class (Unified simple heart-rate + duration + kcal mode)
+      // Section 1.5: COROS Sport / Class (6 exact fields from COROS Training Hub Summary)
       if (sportItems.length > 0) {
-        html += `<div class="track-section-hdr sport-hdr"><span>🏸 專項運動與課程（時長 / 心率 / 熱量）</span><span>免填組數・直接對齊手錶數據</span></div>`;
+        html += `<div class="track-section-hdr sport-hdr"><span>⌚ 專項運動與課程（COROS 概要數據 6 格）</span><span>直接對齊手錶數據・無需填 RPE</span></div>`;
         sportItems.forEach(it => {
           const ytHtml = it.video
             ? `<a href="${it.video}" target="_blank" rel="noopener noreferrer" class="yt-btn">▶ 觀看場上步法與熱身參考</a>`
@@ -1574,6 +1599,9 @@
           const minVal = parseFloat(it.sportMin) || 0;
           const hrVal = parseFloat(it.sportAvgHr) || 0;
           const kcalVal = parseFloat(it.sportKcal) || 0;
+          const loadVal = parseFloat(it.sportLoad) || 0;
+          const aeroVal = it.sportAerobicTe !== "" ? it.sportAerobicTe : "-";
+          const anaeroVal = it.sportAnaerobicTe !== "" ? it.sportAnaerobicTe : "-";
 
           html += `
             <div class="ex-card sport-card ${it.status === "✅ 已完成" ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
@@ -1588,40 +1616,44 @@
                   <option value="⏭️ 略過/調整" ${it.status === "⏭️ 略過/調整" ? "selected" : ""}>⏭️ 略過/調整</option>
                 </select>
               </div>
-              <div class="meta-chips">
-                <span class="meta-chip">參考時長：${it.targetReps}</span>
-                <span class="meta-chip">強度定位：${it.rpe}</span>
-              </div>
               <div class="cue-box">
                 <div><strong>紀錄方式：</strong>${it.cues}</div>
                 <div style="margin-top:4px;"><strong>訓練效益：</strong>${it.muscles}</div>
                 ${ytHtml}
               </div>
-              <div class="input-grid">
+              <div class="input-grid-3">
                 <div class="field-group">
-                  <label>總運動時長 (分鐘)</label>
-                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportMin" value="${it.sportMin}" placeholder="例：60" />
+                  <label>運動時間 (分鐘)</label>
+                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportMin" value="${it.sportMin}" placeholder="例：61" />
                 </div>
                 <div class="field-group">
                   <label>平均心率 (bpm)</label>
-                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportAvgHr" value="${it.sportAvgHr}" placeholder="例：145" />
+                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportAvgHr" value="${it.sportAvgHr}" placeholder="例：142" />
                 </div>
                 <div class="field-group">
-                  <label>動態消耗熱量 (kcal)</label>
-                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportKcal" value="${it.sportKcal}" placeholder="例：420" />
+                  <label>卡路里 (kcal)</label>
+                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportKcal" value="${it.sportKcal}" placeholder="例：742" />
                 </div>
                 <div class="field-group">
-                  <label>主觀疲勞 RPE (1-10)</label>
-                  <input type="number" step="0.5" min="1" max="10" class="ctrl-input" data-field="sportRpe" value="${it.sportRpe}" placeholder="例：7.5" />
+                  <label>訓練負荷 (TL)</label>
+                  <input type="number" step="1" min="0" class="ctrl-input" data-field="sportLoad" value="${it.sportLoad}" placeholder="例：117" />
+                </div>
+                <div class="field-group">
+                  <label>有氧效果 (TE)</label>
+                  <input type="number" step="0.1" min="0" max="5" class="ctrl-input" data-field="sportAerobicTe" value="${it.sportAerobicTe}" placeholder="例：3.1" />
+                </div>
+                <div class="field-group">
+                  <label>無氧效果 (TE)</label>
+                  <input type="number" step="0.1" min="0" max="5" class="ctrl-input" data-field="sportAnaerobicTe" value="${it.sportAnaerobicTe}" placeholder="例：0.9" />
                 </div>
               </div>
               <div class="field-group" style="margin-top:8px;">
-                <label>課程內容與身體感受筆記（選填）</label>
-                <input type="text" class="ctrl-input" data-field="sportNotes" value="${escapeHtml(it.sportNotes)}" placeholder="選填：當日課程內容或肩踝體感" />
+                <label>課程內容與備註（選填）</label>
+                <input type="text" class="ctrl-input" data-field="sportNotes" value="${escapeHtml(it.sportNotes)}" placeholder="選填：當日課程內容或身體感受" />
               </div>
               <div class="calc-strip sport-calc">
-                <span>專項累計：${minVal} 分鐘</span>
-                <span>${hrVal > 0 ? "均心率 " + hrVal + " bpm" : "均心率未填"}${kcalVal > 0 ? "｜" + kcalVal + " kcal" : ""}</span>
+                <span>${minVal} 分｜均心率 ${hrVal || "-"} bpm｜${kcalVal || "-"} kcal</span>
+                <span>負荷 ${loadVal || "-"}｜有氧 ${aeroVal} / 無氧 ${anaeroVal}</span>
               </div>
             </div>
           `;
@@ -1837,8 +1869,8 @@
             }
           }
 
-          if (item.rowType === "sport" && ["sportMin", "sportAvgHr", "sportKcal"].includes(field)) {
-            const hasAny = (parseFloat(item.sportMin) || 0) > 0 || (parseFloat(item.sportAvgHr) || 0) > 0 || (parseFloat(item.sportKcal) || 0) > 0;
+          if (item.rowType === "sport" && ["sportMin", "sportAvgHr", "sportKcal", "sportLoad", "sportAerobicTe", "sportAnaerobicTe"].includes(field)) {
+            const hasAny = (parseFloat(item.sportMin) || 0) > 0 || (parseFloat(item.sportAvgHr) || 0) > 0 || (parseFloat(item.sportKcal) || 0) > 0 || (parseFloat(item.sportLoad) || 0) > 0;
             if (hasAny && item.status === "⬜ 待完成") {
               item.status = "✅ 已完成";
             }
@@ -1917,9 +1949,12 @@
         const minVal = parseFloat(item.sportMin) || 0;
         const hrVal = parseFloat(item.sportAvgHr) || 0;
         const kcalVal = parseFloat(item.sportKcal) || 0;
+        const loadVal = parseFloat(item.sportLoad) || 0;
+        const aeroVal = item.sportAerobicTe !== "" ? item.sportAerobicTe : "-";
+        const anaeroVal = item.sportAnaerobicTe !== "" ? item.sportAnaerobicTe : "-";
         const strip = card.querySelector(".calc-strip");
         if (strip) {
-          strip.innerHTML = `<span>專項累計：${minVal} 分鐘</span><span>${hrVal > 0 ? "均心率 " + hrVal + " bpm" : "均心率未填"}${kcalVal > 0 ? "｜" + kcalVal + " kcal" : ""}</span>`;
+          strip.innerHTML = `<span>${minVal} 分｜均心率 ${hrVal || "-"} bpm｜${kcalVal || "-"} kcal</span><span>負荷 ${loadVal || "-"}｜有氧 ${aeroVal} / 無氧 ${anaeroVal}</span>`;
         }
         const statusSel = card.querySelector('[data-field="status"]');
         if (statusSel && statusSel.value !== item.status) {
@@ -2111,6 +2146,7 @@
       const totCardioKm = Math.round(statsByDay.reduce((s, x) => s + x.cardioKm, 0) * 100) / 100;
       const totCardioMin = statsByDay.reduce((s, x) => s + x.cardioMin + x.sportMin, 0);
       const totSportKcal = statsByDay.reduce((s, x) => s + x.sportKcal, 0);
+      const totSportLoad = statsByDay.reduce((s, x) => s + x.sportLoad, 0);
 
       document.getElementById("overviewKpiGrid").innerHTML = `
         <div class="kpi-card">
@@ -2129,9 +2165,9 @@
           <div class="k-sub">總時長 ${totWalkMin} 分｜全週均速 ${avgWalkSpeed} km/h</div>
         </div>
         <div class="kpi-card">
-          <div class="k-title">專項課程與有氧累計</div>
+          <div class="k-title">COROS 專項與有氧累計</div>
           <div class="k-val" style="color:#be123c;">${totCardioMin} 分</div>
-          <div class="k-sub">${totCardioKm > 0 ? "有氧 " + totCardioKm + " km｜" : ""}專項消耗 ${totSportKcal} kcal</div>
+          <div class="k-sub">${totCardioKm > 0 ? "有氧 " + totCardioKm + " km｜" : ""}負荷 ${totSportLoad}｜${totSportKcal} kcal</div>
         </div>
       `;
 
@@ -2160,7 +2196,7 @@
         <div class="bar-row">
           <strong>${d.weekday} ${d.date.slice(5)}</strong>
           <div class="bar-track"><div class="bar-fill rose" style="width:${Math.round((dayTotMin / maxMin) * 100)}%"></div></div>
-          <span style="text-align:right; font-weight:700; color:#be123c;">${dayTotMin} 分${d.sportAvgHr > 0 ? " (" + d.sportAvgHr + "bpm)" : ""}</span>
+          <span style="text-align:right; font-weight:700; color:#be123c;">${dayTotMin} 分${d.sportLoad > 0 ? " (TL " + d.sportLoad + ")" : ""}</span>
         </div>
       `;
       }).join("");
@@ -2176,14 +2212,18 @@
               <th>重訓容量 (kg)</th>
               <th>散步距離 (km)</th>
               <th>散步均速</th>
-              <th>專項 / 有氧紀錄</th>
+              <th>COROS 專項 / 有氧紀錄</th>
             </tr>
           </thead>
           <tbody>
             ${statsByDay.map(d => {
               let specCell = "-";
-              if (d.sportMin > 0 || d.sportKcal > 0 || d.sportAvgHr > 0) {
-                specCell = `${d.sportMin}分` + (d.sportAvgHr > 0 ? ` / ${d.sportAvgHr}bpm` : "") + (d.sportKcal > 0 ? ` / ${d.sportKcal}kcal` : "");
+              if (d.sportMin > 0 || d.sportKcal > 0 || d.sportAvgHr > 0 || d.sportLoad > 0) {
+                const segs = [`${d.sportMin}分`];
+                if (d.sportAvgHr > 0) segs.push(`${d.sportAvgHr}bpm`);
+                if (d.sportLoad > 0) segs.push(`TL:${d.sportLoad}`);
+                if (d.sportKcal > 0) segs.push(`${d.sportKcal}kcal`);
+                specCell = segs.join(" / ");
               } else if (d.cardioMin > 0 || d.cardioKm > 0) {
                 specCell = `${d.cardioKm}km / ${d.cardioMin}分 / ${d.cardioIncline}%`;
               }
@@ -2257,10 +2297,13 @@ function doPost(e) {
         const m = calcStrengthMetrics(it);
         const wSpd = calcWalkSpeed(it);
         if (it.rowType === "sport") {
-          const hrStr = it.sportAvgHr ? `均心率 ${it.sportAvgHr} bpm` : "";
-          const kcalStr = it.sportKcal ? `消耗 ${it.sportKcal} kcal` : "";
-          const rpeStr = it.sportRpe ? `RPE ${it.sportRpe}` : "";
-          const metaSummary = [hrStr, kcalStr, rpeStr].filter(Boolean).join(" / ");
+          const corosParts = [];
+          if (it.sportAvgHr) corosParts.push(`均心率 ${it.sportAvgHr} bpm`);
+          if (it.sportKcal) corosParts.push(`卡路里 ${it.sportKcal} kcal`);
+          if (it.sportLoad) corosParts.push(`訓練負荷 ${it.sportLoad}`);
+          if (it.sportAerobicTe !== "" && it.sportAerobicTe !== undefined) corosParts.push(`有氧效果 ${it.sportAerobicTe}`);
+          if (it.sportAnaerobicTe !== "" && it.sportAnaerobicTe !== undefined) corosParts.push(`無氧效果 ${it.sportAnaerobicTe}`);
+          const metaSummary = corosParts.join(" / ");
           const combinedNotes = [it.sportNotes || "", metaSummary].filter(Boolean).join("｜") || it.cues;
           return [
             it.date, it.weekday, it.module, it.phase, it.name, it.basis,
@@ -2451,6 +2494,17 @@ function doPost(e) {
                 }
                 if (items[idx].rowType === "sport") {
                   items[idx].sportMin = r[24] !== "" ? String(r[24]) : "";
+                  const noteCol = String(r[11] || "");
+                  const hrMatch = noteCol.match(/均心率\s*(\d+)/);
+                  const kcalMatch = noteCol.match(/卡路里\s*(\d+)/);
+                  const loadMatch = noteCol.match(/訓練負荷\s*(\d+)/);
+                  const aeroMatch = noteCol.match(/有氧效果\s*([\d.]+)/);
+                  const anaeroMatch = noteCol.match(/無氧效果\s*([\d.]+)/);
+                  if (hrMatch) items[idx].sportAvgHr = hrMatch[1];
+                  if (kcalMatch) items[idx].sportKcal = kcalMatch[1];
+                  if (loadMatch) items[idx].sportLoad = loadMatch[1];
+                  if (aeroMatch) items[idx].sportAerobicTe = aeroMatch[1];
+                  if (anaeroMatch) items[idx].sportAnaerobicTe = anaeroMatch[1];
                 } else {
                   items[idx].basis = r[5] || items[idx].basis;
                   items[idx].baseKg = r[6] !== "" ? Number(r[6]) : 0;
@@ -2491,7 +2545,7 @@ function doPost(e) {
       });
 
       document.getElementById("exportJsonBtn").addEventListener("click", () => {
-        const backup = { version: "v10", exportedAt: new Date().toISOString(), items, machines };
+        const backup = { version: "v11", exportedAt: new Date().toISOString(), items, machines };
         const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
