@@ -145,7 +145,6 @@
       display: block;
     }
 
-    /* Week Switcher Bar */
     .week-switcher {
       display: flex;
       align-items: center;
@@ -184,7 +183,6 @@
       color: #ffffff;
     }
 
-    /* Day Strip */
     .day-strip {
       display: grid;
       grid-template-columns: repeat(7, minmax(76px, 1fr));
@@ -246,7 +244,6 @@
       color: #f8fafc;
     }
 
-    /* Day Summary Banner */
     .day-summary-card {
       background: #ffffff;
       border-radius: var(--radius-lg);
@@ -328,7 +325,6 @@
       display: block;
     }
 
-    /* Section Headers inside Day View */
     .track-section-hdr {
       display: flex;
       align-items: center;
@@ -370,7 +366,6 @@
       border-left: 4px solid var(--rose-700);
     }
 
-    /* Exercise & Track Cards */
     .ex-card {
       background: #ffffff;
       border: 1px solid var(--slate-200);
@@ -604,7 +599,6 @@
       border-radius: 6px;
     }
 
-    /* Form Controls */
     .input-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
@@ -800,7 +794,6 @@
       min-height: 30px;
     }
 
-    /* Overview & Charts */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -907,7 +900,6 @@
       background: var(--slate-50);
     }
 
-    /* Machine Library */
     .star-row {
       display: flex;
       gap: 4px;
@@ -971,7 +963,6 @@
       white-space: pre;
     }
 
-    /* Modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -1106,17 +1097,17 @@
       </div>
 
       <div class="panel-card">
-        <h2 class="panel-title" id="chartStrengthTitle">圖表 A｜當週每日重訓總容量 Volume（kg）</h2>
+        <h2 class="panel-title">圖表 A｜當週每日重訓總容量 Volume（kg）</h2>
         <div id="chartStrength"></div>
       </div>
 
       <div class="panel-card">
-        <h2 class="panel-title" id="chartWalkTitle">圖表 B｜當週每日午間散步 NEAT 距離（km）與均速</h2>
+        <h2 class="panel-title">圖表 B｜當週每日午間散步 NEAT 距離（km）與均速</h2>
         <div id="chartWalk"></div>
       </div>
 
       <div class="panel-card">
-        <h2 class="panel-title" id="chartCardioTitle">圖表 C｜當週每日專項與有氧總時長（分鐘）</h2>
+        <h2 class="panel-title">圖表 C｜當週每日專項與有氧總時長（分鐘）</h2>
         <div id="chartCardio"></div>
       </div>
 
@@ -1138,9 +1129,9 @@
     <!-- TAB 4: GOOGLE CLOUD SYNC & BACKUP -->
     <section id="tab-sync" class="tab-panel">
       <div class="panel-card">
-        <h2 class="panel-title">☁️ Google 試算表動態連線設定（全動態讀取・局部安全寫回）</h2>
+        <h2 class="panel-title">☁️ Google 試算表動態連線設定（全裝置預設已綁定）</h2>
         <p style="font-size:0.83rem; color:#475569; margin-top:0;">
-          網頁開啟時會自動向試算表拉取所有週次與歷史紀錄；按下「上傳同步至試算表」時僅依 <code>日期 + 階段</code> 局部更新對應列，<strong>不會覆蓋或清除其他週次的歷史數據</strong>。
+          已內建預設部署網址，任何新裝置開啟即自動載入；按下「上傳同步至試算表」時僅依 <code>日期 + 階段</code> 局部更新對應列，<strong>不會覆蓋其他週次的歷史數據</strong>。
         </p>
         <div class="field-group">
           <label>Google Apps Script 部署網址（Web App URL）</label>
@@ -1178,7 +1169,6 @@
     </section>
   </main>
 
-  <!-- Image Lightbox Modal -->
   <div class="modal-backdrop" id="imgModal">
     <img src="" alt="器材放大檢視" class="modal-img" id="modalImgEl" />
   </div>
@@ -1186,12 +1176,12 @@
   <div class="toast" id="toastEl"></div>
 
   <script>
+    const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbyA6FpeOsSqKAUMqNVz3hgVrBkahjYKQU5LH56EZr0zn8zvRuggktjRBJ9bv6ig_wuhjQ/exec";
     const STORAGE_KEY_ITEMS = "workout_tracker_dynamic_items_v1";
     const STORAGE_KEY_MACHINES = "workout_tracker_dynamic_machines_v1";
-    const STORAGE_KEY_GAS = "workout_tracker_dynamic_gas_url_v1";
+    const STORAGE_KEY_GAS = "workout_tracker_dynamic_gas_url_v2";
     const LEGACY_KEYS_ITEMS = ["workout_tracker_20261116_v7_items"];
     const LEGACY_KEYS_MACHINES = ["workout_tracker_20261116_v7_machines"];
-    const LEGACY_KEYS_GAS = ["workout_tracker_20261116_v7_gas_url"];
 
     let items = [];
     let machines = [];
@@ -1207,11 +1197,7 @@
       if (inputEl && inputEl.value.trim()) return inputEl.value.trim();
       const direct = localStorage.getItem(STORAGE_KEY_GAS);
       if (direct) return direct;
-      for (const k of LEGACY_KEYS_GAS) {
-        const legacy = localStorage.getItem(k);
-        if (legacy) return legacy;
-      }
-      return "";
+      return DEFAULT_GAS_URL;
     }
 
     function normalizeSheetDate(val) {
@@ -1429,10 +1415,8 @@
       }
 
       const url = getGasUrl();
-      if (url) {
-        document.getElementById("gasUrlInput").value = url;
-        localStorage.setItem(STORAGE_KEY_GAS, url);
-      }
+      document.getElementById("gasUrlInput").value = url;
+      localStorage.setItem(STORAGE_KEY_GAS, url);
       pickBestDateAndWeek(false);
     }
 
@@ -1452,11 +1436,6 @@
       const url = getGasUrl();
       const statusEl = document.getElementById("syncStatusMsg");
       const headerStatus = document.getElementById("saveStatus");
-      if (!url) {
-        document.getElementById("appSubtitle").textContent = "尚未綁定雲端試算表｜請至「☁️ 雲端同步」貼上 Apps Script 網址";
-        headerStatus.textContent = "未連線";
-        return false;
-      }
 
       headerStatus.textContent = "雲端同步中...";
       if (!silent && statusEl) statusEl.textContent = "⏳ 正在從 Google 試算表載入所有週次與歷史紀錄...";
@@ -1512,7 +1491,6 @@
       t._timer = setTimeout(() => { t.style.display = "none"; }, 2600);
     }
 
-    // Calculations
     function calcStrengthMetrics(item) {
       if (item.basis === "自重 / 彈力帶" || item.basis === "時間 / 距離" || item.rowType === "walk" || item.rowType === "cardio" || item.rowType === "sport") {
         return { effectiveKg: 0, volumeKg: 0 };
@@ -1541,7 +1519,6 @@
       return Math.round((km / (min / 60)) * 100) / 100;
     }
 
-    // Find most recent completed record of the same exercise before current item's date
     function findPreviousCompletedRecord(currentItem) {
       const targetName = String(currentItem.name || "").trim();
       if (!targetName) return null;
@@ -1630,8 +1607,8 @@
       const subEl = document.getElementById("appSubtitle");
 
       if (weeks.length === 0) {
-        if (subEl) subEl.textContent = "尚無課表資料｜請至「☁️ 雲端同步」綁定試算表網址";
-        if (bar) bar.innerHTML = `<span style="font-size:0.82rem; color:#64748b; font-weight:700;">尚未載入試算表課表，請先前往「☁️ 雲端同步」設定網址。</span>`;
+        if (subEl) subEl.textContent = "正在從雲端試算表載入課表...";
+        if (bar) bar.innerHTML = `<span style="font-size:0.82rem; color:#64748b; font-weight:700;">⏳ 正在連線試算表載入最新課表...</span>`;
         return;
       }
 
@@ -1710,7 +1687,7 @@
       const box = document.getElementById("daySummaryCard");
       const allDays = getAllDaysMeta();
       if (allDays.length === 0) {
-        box.innerHTML = `<div style="text-align:center; padding:12px; color:#64748b;">尚無訓練課表資料，請先至「☁️ 雲端同步」連線 Google 試算表。</div>`;
+        box.innerHTML = `<div style="text-align:center; padding:12px; color:#64748b;">⏳ 正在從 Google 試算表讀取最新課表...</div>`;
         return;
       }
       const meta = allDays.find(d => d.date === selectedDate) || allDays[0];
@@ -2271,7 +2248,6 @@
       }
     }
 
-    // Machine Library Logic
     function renderStarSelector() {
       const row = document.getElementById("mStarRow");
       row.innerHTML = [1, 2, 3, 4, 5].map(n => `
@@ -2424,7 +2400,6 @@
       });
     }
 
-    // Overview & Cross-Week History
     function renderOverviewView() {
       renderWeekSwitcher("overviewWeekSwitcherBar", renderOverviewView);
       const weeks = getWeeksList();
@@ -2469,7 +2444,6 @@
         </div>
       `;
 
-      // Cross-week comparison chart
       const weekSummaries = weeks.map(w => {
         const dStats = w.days.map(d => getDayStats(d.date));
         const wVol = Math.round(dStats.reduce((s, x) => s + x.totalVol, 0) * 10) / 10;
@@ -2627,7 +2601,6 @@
       renderHistoryRows();
     }
 
-    // Cloud Sync & Export
     const GAS_CODE_TEMPLATE = `function doGet(e) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheetSched = ss.getSheetByName("每日詳細訓練課表");
@@ -2771,7 +2744,6 @@ function doPost(e) {
         .replace(/"/g, "&quot;");
     }
 
-    // Event Listeners Setup
     document.addEventListener("DOMContentLoaded", () => {
       loadLocalCache();
       document.getElementById("gasCodeBlock").textContent = GAS_CODE_TEMPLATE;
@@ -2779,7 +2751,6 @@ function doPost(e) {
       renderStarSelector();
       renderMachineLibrary();
 
-      // Auto-sync latest schedule & history from Google Sheets on page load
       syncFromCloud(true);
 
       document.querySelectorAll(".nav-tab").forEach(tab => {
@@ -2887,10 +2858,6 @@ function doPost(e) {
 
       document.getElementById("pushCloudBtn").addEventListener("click", async () => {
         const url = getGasUrl();
-        if (!url) {
-          showToast("請先輸入並儲存 Google Apps Script 網址");
-          return;
-        }
         const statusEl = document.getElementById("syncStatusMsg");
         statusEl.textContent = "⏳ 正在上傳局部更新至 Google 試算表...";
         try {
