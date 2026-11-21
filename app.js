@@ -37,7 +37,7 @@
     let photoSessionRevision = 0;
     let photoIndex = new Map();
     let photoChanges = new Map();
-    let pendingEdits = { schedule: {}, machines: {} };
+    let pendingEdits = { schedule: {}, machines: {}, copiedDays: {} };
     let syncTimer;
     let syncRunning = false;
 
@@ -215,7 +215,7 @@
           sportAerobicTe: "",
           sportAnaerobicTe: "",
           sportNotes: "",
-          status: String(r[27] || "").trim() || (rowType === "cardio" ? "➖ 今日無有氧" : "⬜ 待完成")
+          status: String(r[27] || "").trim() || (rowType === "cardio" && !name ? "➖ 今日無有氧" : "⬜ 待完成")
         };
 
         if (rowType === "sport" || rowType === "cardio") {
@@ -277,7 +277,7 @@
 
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY_SYNC_QUEUE) || "null");
-        if (saved) pendingEdits = saved;
+        if (saved) pendingEdits = { ...pendingEdits, ...saved };
         else {
           if (items.length && !localStorage.getItem(STORAGE_KEY_PRE_SYNC_ITEMS)) {
             localStorage.setItem(STORAGE_KEY_PRE_SYNC_ITEMS, JSON.stringify(items));
@@ -305,7 +305,55 @@
     }
 
     function hasPendingEdits() {
-      return Object.keys(pendingEdits.schedule).length > 0 || Object.keys(pendingEdits.machines).length > 0;
+      return Object.values(pendingEdits).some(edits => Object.keys(edits).length > 0);
+    }
+
+    function nextWeekDate(date) {
+      if (!/^\d{4}\/\d{2}\/\d{2}$/.test(date)) return "";
+      const day = new Date(date.replace(/\//g, "-") + "T00:00:00Z");
+      if (Number.isNaN(day.getTime()) || day.toISOString().slice(0, 10).replace(/-/g, "/") !== date) return "";
+      day.setUTCDate(day.getUTCDate() + 7);
+      return day.toISOString().slice(0, 10).replace(/-/g, "/");
+    }
+
+    function buildNextWeekCopy(week) {
+      const occupied = new Set(items.map(item => item.date));
+      const copies = new Map();
+      for (const day of week.days) {
+        const date = nextWeekDate(day.date);
+        if (date && !occupied.has(date) && !pendingEdits.copiedDays[date]) copies.set(day.date, { date, rows: [] });
+      }
+      const sourceItems = items.filter(item => copies.has(item.date));
+      const rows = build28ColRows(sourceItems).slice(1);
+      sourceItems.forEach((item, index) => {
+        const copy = copies.get(item.date);
+        const plan = rows[index].slice(0, 14).concat(Array(14).fill(""));
+        plan[0] = copy.date;
+        if (item.rowType === "sport" || item.rowType === "cardio" || item.rowType === "custom") plan[11] = "";
+        if (item.rowType === "custom") {
+          plan[4] = "";
+          plan[5] = "總重 (含槓/機重)";
+          plan[6] = 0;
+        }
+        copy.rows.push(plan);
+      });
+      return [...copies.values()].filter(copy => copy.rows.length > 0);
+    }
+
+    function copySelectedWeek() {
+      const week = getWeeksList()[selectedWeekIdx];
+      if (!week) return;
+      const copies = buildNextWeekCopy(week);
+      if (!copies.length) {
+        showToast("下週對應日期已排課或正在同步");
+        return;
+      }
+      if (!confirm("將這週菜單複製到下週？已排好的日期會保留，實際訓練紀錄會留空。")) return;
+      copies.forEach(copy => { pendingEdits.copiedDays[copy.date] = copy; });
+      saveSyncQueue();
+      document.getElementById("saveStatus").textContent = "待同步";
+      showToast("已排入同步，下週菜單會在同步後顯示");
+      scheduleSync(0);
     }
 
     function setPhotoSyncStatus(message, canSignIn = false) {
@@ -520,11 +568,13 @@
           status.textContent = "同步中…";
           const schedule = Object.entries(pendingEdits.schedule);
           const machineChanges = Object.entries(pendingEdits.machines);
+          const copiedDays = Object.values(pendingEdits.copiedDays);
           const body = JSON.stringify({
             autoSyncVersion: SYNC_VERSION,
             scheduleHeader: build28ColRows([])[0],
             scheduleChanges: schedule.map(([, edit]) => edit),
-            machineChanges: machineChanges.map(([, record]) => record)
+            machineChanges: machineChanges.map(([, record]) => record),
+            copiedDays
           });
           const result = await fetch(DEFAULT_GAS_URL, {
             method: "POST",
@@ -546,6 +596,16 @@
           }
           for (const [key, record] of machineChanges) {
             if (pendingEdits.machines[key] === record) delete pendingEdits.machines[key];
+          }
+          if (copiedDays.length) {
+            const receipt = reply.copyResult;
+            if (!Number.isInteger(receipt?.created) || !Number.isInteger(receipt?.skipped) ||
+                receipt.created < 0 || receipt.skipped < 0 || receipt.created + receipt.skipped !== copiedDays.length) {
+              saveSyncQueue();
+              throw new Error("Cloud did not acknowledge the week copy");
+            }
+            copiedDays.forEach(copy => { delete pendingEdits.copiedDays[copy.date]; });
+            showToast(receipt.created ? `已建立下週菜單，共 ${receipt.created} 天` : "下週對應日期已有菜單");
           }
           saveSyncQueue();
         }
@@ -718,6 +778,7 @@
             </button>
           `).join("")}
           <button type="button" class="btn btn-outline btn-sm" id="${targetElId}_todayBtn">🎯 今日 (${todayStr.slice(5)})</button>
+          ${targetElId === "weekSwitcherBar" ? '<button type="button" class="btn btn-outline btn-sm" id="copyNextWeekBtn">複製到下週</button>' : ""}
         </div>
       `;
 
@@ -739,6 +800,7 @@
           onWeekChange();
         });
       }
+      bar.querySelector("#copyNextWeekBtn")?.addEventListener("click", copySelectedWeek);
     }
 
     function renderDayStrip() {
@@ -1724,6 +1786,7 @@ function normalizeDateCell_(val) {
 ${classifyRowType.toString()}
 ${calcStrengthMetrics.toString()}
 ${calcWalkSpeed.toString()}
+${nextWeekDate.toString()}
 
 function updateRow_(sheet, rowNumber, current, formulas, next) {
   var start = -1;
@@ -1806,6 +1869,34 @@ function syncSchedule_(sheet, rows, changedColumns) {
   }
 }
 
+function appendCopiedDays_(sheet, header, copies) {
+  if (!Array.isArray(header) || header.length !== 28) throw new Error("Invalid schedule header");
+  var lastRow = sheet.getLastRow();
+  var occupied = new Set(lastRow > 1
+    ? sheet.getRange(2, 1, lastRow - 1, 1).getValues().map(function(row) { return normalizeDateCell_(row[0]); })
+    : []);
+  var toAppend = lastRow === 0 ? [header] : [];
+  var result = { created: 0, skipped: 0 };
+  copies.forEach(function(copy) {
+    var date = copy.date;
+    if (!nextWeekDate(date) || !Array.isArray(copy.rows) || !copy.rows.length ||
+        copy.rows.some(function(row) { return !Array.isArray(row) || row.length !== 28 || row[0] !== date; })) {
+      throw new Error("Invalid copied schedule day");
+    }
+    if (occupied.has(date)) {
+      result.skipped++;
+      return;
+    }
+    copy.rows.forEach(function(row) {
+      toAppend.push(row.slice(0, 14).concat(Array(14).fill("")));
+    });
+    occupied.add(date);
+    result.created++;
+  });
+  if (toAppend.length) sheet.getRange(lastRow + 1, 1, toAppend.length, 28).setValues(toAppend);
+  return result;
+}
+
 function syncMachines_(sheet, machines) {
   var headers = ["ID", "登錄日期", "器材名稱", "分類模式", "評分(1-5)", "座椅/設定參數", "發力感受與筆記"];
   var rows = [headers].concat(machines.map(function(m) {
@@ -1856,6 +1947,7 @@ function syncMachineChanges_(sheet, changes) {
 
 function doPost(e) {
   var payload = JSON.parse(e.postData.contents);
+  var copyResult;
   var lock = LockService.getScriptLock();
   lock.waitLock(30000);
   try {
@@ -1866,6 +1958,10 @@ function doPost(e) {
         var rows = [payload.scheduleHeader].concat(payload.scheduleChanges.map(function(edit) { return edit.row; }));
         var columns = payload.scheduleChanges.map(function(edit) { return edit.columns; });
         syncSchedule_(scheduleSheet, rows, columns);
+      }
+      if (payload.copiedDays && payload.copiedDays.length > 0) {
+        var copySheet = ss.getSheetByName("每日詳細訓練課表") || ss.insertSheet("每日詳細訓練課表");
+        copyResult = appendCopiedDays_(copySheet, payload.scheduleHeader, payload.copiedDays);
       }
       if (payload.machineChanges && payload.machineChanges.length > 0) {
         var machineSheet = ss.getSheetByName("器械感受收藏庫") || ss.insertSheet("器械感受收藏庫");
@@ -1886,7 +1982,8 @@ function doPost(e) {
 
   return ContentService.createTextOutput(JSON.stringify({
     status: "saved",
-    syncVersion: "${SYNC_VERSION}"
+    syncVersion: "${SYNC_VERSION}",
+    copyResult: copyResult
   }))
     .setMimeType(ContentService.MimeType.JSON);
 }`;
