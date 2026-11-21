@@ -107,7 +107,7 @@
       max-width: 960px;
       margin: 12px auto 0;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 6px;
     }
 
@@ -951,18 +951,6 @@
       gap: 6px;
     }
 
-    .code-box {
-      background: var(--navy-900);
-      color: #e2e8f0;
-      padding: 12px;
-      border-radius: var(--radius-md);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 0.76rem;
-      max-height: 240px;
-      overflow: auto;
-      white-space: pre;
-    }
-
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -1009,13 +997,12 @@
         <h1 class="app-title">訓練菜單與動態追蹤系統</h1>
         <p class="app-subtitle" id="appSubtitle">正在連線雲端試算表載入最新課表...</p>
       </div>
-      <span class="save-indicator" id="saveStatus">準備中</span>
+      <span class="save-indicator" id="saveStatus" role="status">準備中</span>
     </div>
     <nav class="nav-tabs">
       <button class="nav-tab active" data-tab="tab-schedule">📋 每日課表</button>
       <button class="nav-tab" data-tab="tab-machines">📸 器械收藏庫</button>
       <button class="nav-tab" data-tab="tab-overview">📊 總覽統計</button>
-      <button class="nav-tab" data-tab="tab-sync">☁️ 雲端同步</button>
     </nav>
   </header>
 
@@ -1124,48 +1111,18 @@
         </div>
         <div class="table-wrap" id="historyExerciseWrap"></div>
       </div>
-    </section>
-
-    <!-- TAB 4: GOOGLE CLOUD SYNC & BACKUP -->
-    <section id="tab-sync" class="tab-panel">
-      <div class="panel-card">
-        <h2 class="panel-title">☁️ Google 試算表動態連線設定（全裝置已統一綁定）</h2>
-        <p style="font-size:0.83rem; color:#475569; margin-top:0;">
-          手機與電腦已統一綁定最新部署網址，開啟即自動載入；按下「上傳同步至試算表」時僅依 <code>日期 + 階段</code> 局部更新對應列，<strong>不會覆蓋其他週次的歷史數據</strong>。
-        </p>
-        <div class="field-group">
-          <label>Google Apps Script 部署網址（Web App URL）</label>
-          <input type="url" id="gasUrlInput" class="ctrl-input" placeholder="https://script.google.com/macros/s/xxxxx/exec" />
-        </div>
-        <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
-          <button type="button" class="btn btn-primary" id="saveGasUrlBtn">儲存並立即連線載入</button>
-          <button type="button" class="btn btn-teal" id="pushCloudBtn">⬆️ 上傳同步至試算表</button>
-          <button type="button" class="btn btn-outline" id="pullCloudBtn">⬇️ 重新從試算表載入</button>
-        </div>
-        <p id="syncStatusMsg" style="font-size:0.8rem; color:#0f766e; font-weight:700; margin:8px 0 0;"></p>
-      </div>
-
-      <div class="panel-card">
-        <h2 class="panel-title">💾 本機備份與匯出（CSV / JSON）</h2>
+      <details class="panel-card">
+        <summary>備份與匯出</summary>
         <div style="display:flex; flex-wrap:wrap; gap:8px;">
           <button type="button" class="btn btn-outline" id="exportCsvBtn">📥 匯出全歷史 CSV（含 UTF-8 BOM）</button>
           <button type="button" class="btn btn-outline" id="exportJsonBtn">📦 匯出完整 JSON 備份</button>
+          <button type="button" class="btn btn-outline" id="exportPreSyncBtn" hidden>下載啟用自動同步前的本機課表</button>
           <label class="btn btn-outline" style="cursor:pointer;">
             📂 匯入 JSON 還原
             <input type="file" id="importJsonInput" accept=".json" style="display:none;" />
           </label>
-          <button type="button" class="btn btn-danger" id="clearCacheBtn">🗑️ 清除本機快取並重抓雲端</button>
         </div>
-      </div>
-
-      <div class="panel-card">
-        <h2 class="panel-title">📜 Google Apps Script 後端程式碼（Code.gs・支援 Upsert 不覆蓋舊週）</h2>
-        <p style="font-size:0.8rem; color:#475569; margin-top:0;">
-          在試算表「擴充功能 → Apps Script」貼上以下程式碼並發布新版本，即可保留試算表公式，以及有氧和 COROS 紀錄中未填入新值的欄位。
-        </p>
-        <button type="button" class="btn btn-primary btn-sm" id="copyGasCodeBtn" style="margin-bottom:8px;">📋 複製 Apps Script 程式碼</button>
-        <pre class="code-box" id="gasCodeBlock"></pre>
-      </div>
+      </details>
     </section>
   </main>
 
@@ -1179,7 +1136,9 @@
     const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbyDG6HC4CkoIptW844j4uD0oElEaeQjX13yFeYWb0ozpt_ZDg_E_Yt0f4YZUE-Qy1s8vA/exec";
     const STORAGE_KEY_ITEMS = "workout_tracker_dynamic_items_v3";
     const STORAGE_KEY_MACHINES = "workout_tracker_dynamic_machines_v1";
-    const STORAGE_KEY_GAS = "workout_tracker_dynamic_gas_url_v3";
+    const STORAGE_KEY_SYNC_QUEUE = "workout_tracker_sync_queue_v1";
+    const STORAGE_KEY_PRE_SYNC_ITEMS = "workout_tracker_pre_auto_sync_items";
+    const SYNC_VERSION = "workout-auto-sync-v1";
     const LEGACY_KEYS_ITEMS = ["workout_tracker_dynamic_items_v2", "workout_tracker_dynamic_items_v1", "workout_tracker_20261116_v7_items"];
     const LEGACY_KEYS_MACHINES = ["workout_tracker_20261116_v7_machines"];
 
@@ -1204,6 +1163,9 @@
     let editingMachineId = null;
     let currentFormRating = 5;
     let currentFormPhoto = "";
+    let pendingEdits = { schedule: {}, machines: {} };
+    let syncTimer;
+    let syncRunning = false;
 
     function getDynamicCardioOptions() {
       const set = new Set(DEFAULT_CARDIO_OPTIONS);
@@ -1213,14 +1175,6 @@
         }
       });
       return Array.from(set);
-    }
-
-    function getGasUrl() {
-      const inputEl = document.getElementById("gasUrlInput");
-      if (inputEl && inputEl.value.trim()) return inputEl.value.trim();
-      const direct = localStorage.getItem(STORAGE_KEY_GAS);
-      if (direct) return direct;
-      return DEFAULT_GAS_URL;
     }
 
     function normalizeSheetDate(val) {
@@ -1447,8 +1401,19 @@
         machines = [];
       }
 
-      localStorage.setItem(STORAGE_KEY_GAS, DEFAULT_GAS_URL);
-      document.getElementById("gasUrlInput").value = DEFAULT_GAS_URL;
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY_SYNC_QUEUE) || "null");
+        if (saved) pendingEdits = saved;
+        else {
+          if (items.length && !localStorage.getItem(STORAGE_KEY_PRE_SYNC_ITEMS)) {
+            localStorage.setItem(STORAGE_KEY_PRE_SYNC_ITEMS, JSON.stringify(items));
+          }
+          machines = machines.map(machine => ({ ...machine, localOnly: true }));
+          saveSyncQueue();
+        }
+      } catch (e) {
+        // Keep the already loaded workout cache if the queue cannot be read.
+      }
       pickBestDateAndWeek(false);
     }
 
@@ -1456,62 +1421,153 @@
       try {
         localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
         localStorage.setItem(STORAGE_KEY_MACHINES, JSON.stringify(machines));
-        const el = document.getElementById("saveStatus");
-        const now = new Date();
-        el.textContent = "已儲存 " + String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
       } catch (e) {
         showToast("⚠️ 本機儲存空間已滿，請清理舊照片或匯出備份");
       }
     }
 
-    async function syncFromCloud(silent = false) {
-      const url = getGasUrl();
-      const statusEl = document.getElementById("syncStatusMsg");
-      const headerStatus = document.getElementById("saveStatus");
+    function scheduleKey(row) {
+      return normalizeSheetDate(row[0]) + "||" + String(row[3] ?? "").trim();
+    }
 
-      headerStatus.textContent = "雲端同步中...";
-      if (!silent && statusEl) statusEl.textContent = "⏳ 正在從 Google 試算表載入所有週次與歷史紀錄...";
+    function hasPendingEdits() {
+      return Object.keys(pendingEdits.schedule).length > 0 || Object.keys(pendingEdits.machines).length > 0;
+    }
 
+    function saveSyncQueue() {
       try {
-        const res = await fetch(url);
-        const data = await res.json();
-        if (data && Array.isArray(data.schedule) && data.schedule.length > 1) {
-          const parsedItems = parseSheetScheduleRows(data.schedule.slice(1));
-          if (parsedItems.length > 0) {
-            items = parsedItems;
-            if (Array.isArray(data.machines) && data.machines.length > 1 && machines.length === 0) {
-              machines = data.machines.slice(1).map((r, i) => ({
-                id: String(r[0] || ("mach_cloud_" + i)),
-                date: normalizeSheetDate(r[1]),
-                name: String(r[2] || ""),
-                category: String(r[3] || "有氧與功能器械"),
-                rating: Number(r[4]) || 5,
-                setup: String(r[5] || ""),
-                notes: String(r[6] || ""),
-                photo: ""
-              })).filter(machine => machine.name.trim() !== "");
-            }
-            pickBestDateAndWeek(silent && items.length > 0 && selectedDate !== "");
-            saveState();
-            renderScheduleView();
-            if (document.getElementById("tab-overview").classList.contains("active")) {
-              renderOverviewView();
-            }
-            const weeksCount = getWeeksList().length;
-            const msg = `✅ 已同步雲端試算表（共 ${weeksCount} 週 / ${items.length} 筆歷史紀錄）`;
-            if (statusEl) statusEl.textContent = msg;
-            headerStatus.textContent = "雲端已同步";
-            if (!silent) showToast(`已載入 ${weeksCount} 週最新課表`);
-            return true;
-          }
-        }
-        if (statusEl) statusEl.textContent = "⚠️ 試算表尚無有效課表列。";
-        headerStatus.textContent = "無資料";
-        return false;
+        localStorage.setItem(STORAGE_KEY_SYNC_QUEUE, JSON.stringify(pendingEdits));
       } catch (err) {
-        if (statusEl) statusEl.textContent = "❌ 雲端讀取失敗：" + err.message;
-        headerStatus.textContent = "離線快取";
+        showToast("本機儲存空間不足，請保留此頁至同步完成");
+      }
+    }
+
+    function scheduleSync(delay = 800) {
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(syncFromCloud, delay);
+    }
+
+    function queueWorkoutEdit(item, previousRow) {
+      const row = build28ColRows([item])[1];
+      const key = scheduleKey(row);
+      const columns = new Set(pendingEdits.schedule[key]?.columns);
+      row.forEach((value, col) => {
+        if (String(value ?? "") !== String(previousRow?.[col] ?? "")) columns.add(col);
+      });
+      if (columns.size === 0) return;
+      pendingEdits.schedule[key] = { row, columns: [...columns] };
+      saveSyncQueue();
+      document.getElementById("saveStatus").textContent = "待同步";
+      scheduleSync();
+    }
+
+    function queueMachineEdit(machine) {
+      const { photo, localOnly, ...record } = machine;
+      pendingEdits.machines[machine.id] = record;
+      saveSyncQueue();
+      document.getElementById("saveStatus").textContent = "待同步";
+      scheduleSync();
+    }
+
+    function applyCloudSnapshot(data) {
+      const rows = data.schedule.slice(1);
+      const indices = new Map(rows.map((row, index) => [scheduleKey(row), index]));
+      for (const [key, edit] of Object.entries(pendingEdits.schedule)) {
+        const index = indices.get(key) ?? rows.length;
+        const current = rows[index]?.slice() || edit.row.slice();
+        edit.columns.forEach(col => { current[col] = edit.row[col]; });
+        rows[index] = current;
+      }
+      const cloudItems = parseSheetScheduleRows(rows);
+      if (cloudItems.length > 0) items = cloudItems;
+
+      const localMachines = new Map(machines.map(machine => [machine.id, machine]));
+      const cloudMachines = new Map(data.machines.slice(1).flatMap((r, i) => {
+        if (!String(r[2] ?? "").trim()) return [];
+        const id = String(r[0] || ("mach_cloud_" + i));
+        return [[id, {
+          id, date: normalizeSheetDate(r[1]), name: String(r[2]),
+          category: String(r[3] || "有氧與功能器械"), rating: Number(r[4]) || 5,
+          setup: String(r[5] || ""), notes: String(r[6] || "")
+        }]];
+      }));
+      for (const local of localMachines.values()) {
+        if (local.localOnly && !cloudMachines.has(local.id)) cloudMachines.set(local.id, local);
+      }
+      for (const record of Object.values(pendingEdits.machines)) {
+        if (record.deleted) cloudMachines.delete(record.id);
+        else cloudMachines.set(record.id, record);
+      }
+      machines = [...cloudMachines.values()].map(machine => ({
+        ...machine,
+        photo: localMachines.get(machine.id)?.photo || ""
+      }));
+      pickBestDateAndWeek(true);
+      saveState();
+      renderScheduleView();
+      if (document.getElementById("tab-overview").classList.contains("active")) renderOverviewView();
+      if (document.getElementById("tab-machines").classList.contains("active")) renderMachineLibrary();
+    }
+
+    async function syncFromCloud({ keepalive = false } = {}) {
+      if (syncRunning) return false;
+      const status = document.getElementById("saveStatus");
+      if (navigator.onLine === false) {
+        status.textContent = hasPendingEdits() ? "離線・待同步" : "離線快取";
         return false;
+      }
+      syncRunning = true;
+      let retry = false;
+      try {
+        if (hasPendingEdits()) {
+          status.textContent = "同步中…";
+          const schedule = Object.entries(pendingEdits.schedule);
+          const machineChanges = Object.entries(pendingEdits.machines);
+          const body = JSON.stringify({
+            autoSyncVersion: SYNC_VERSION,
+            scheduleHeader: build28ColRows([])[0],
+            scheduleChanges: schedule.map(([, edit]) => edit),
+            machineChanges: machineChanges.map(([, record]) => record)
+          });
+          const result = await fetch(DEFAULT_GAS_URL, {
+            method: "POST",
+            signal: AbortSignal.timeout(20000),
+            keepalive: keepalive && new TextEncoder().encode(body).length < 60000,
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body
+          });
+          const reply = await result.json();
+          if (!result.ok || reply.status !== "saved" || reply.syncVersion !== SYNC_VERSION) {
+            throw new Error("Cloud did not acknowledge the update");
+          }
+          for (const [key, edit] of schedule) {
+            const current = pendingEdits.schedule[key];
+            const unsettled = current.columns.filter(col =>
+              !edit.columns.includes(col) || String(current.row[col] ?? "") !== String(edit.row[col] ?? ""));
+            if (unsettled.length > 0) current.columns = unsettled;
+            else delete pendingEdits.schedule[key];
+          }
+          for (const [key, record] of machineChanges) {
+            if (pendingEdits.machines[key] === record) delete pendingEdits.machines[key];
+          }
+          saveSyncQueue();
+        }
+        if (document.hidden) return true;
+        const result = await fetch(DEFAULT_GAS_URL, { cache: "no-store", signal: AbortSignal.timeout(20000) });
+        const data = await result.json();
+        if (!result.ok || data.status !== "ok" || !Array.isArray(data.schedule) || !Array.isArray(data.machines)) {
+          throw new Error("Cloud data is unavailable");
+        }
+        if (!document.activeElement?.matches("main input, main textarea, main select")) applyCloudSnapshot(data);
+        status.textContent = hasPendingEdits() ? "待同步" : "雲端已同步";
+        return true;
+      } catch (err) {
+        retry = true;
+        status.textContent = hasPendingEdits() ? "待同步・將重試" : "暫無連線";
+        return false;
+      } finally {
+        syncRunning = false;
+        if (retry || hasPendingEdits()) scheduleSync(retry ? 15000 : 800);
       }
     }
 
@@ -2150,6 +2206,7 @@
             }
           }
 
+          const previousRow = build28ColRows([item])[1];
           item[field] = newVal;
 
           // 選了項目名稱後，若原本為「➖ 今日無有氧」則自動切換為「⬜ 待完成」（不自動完成鎖定）
@@ -2165,6 +2222,7 @@
             }
           }
 
+          queueWorkoutEdit(item, previousRow);
           saveState();
           if (field === "basis" || field === "status" || (item.rowType === "cardio" && field === "name")) {
             renderScheduleView();
@@ -2186,10 +2244,12 @@
           const item = items.find(x => x.id === card.dataset.id);
           const prev = items.find(x => x.id === btn.dataset.previd);
           if (!item || !prev) return;
+          const previousRow = build28ColRows([item])[1];
           item.basis = prev.basis;
           item.baseKg = prev.baseKg;
           item.addedWeight = prev.addedWeight;
           item.unit = prev.unit;
+          queueWorkoutEdit(item, previousRow);
           saveState();
           renderScheduleView();
           showToast(`已帶入 ${prev.date.slice(5)} 重量設定`);
@@ -2201,7 +2261,9 @@
           const card = e.target.closest(".ex-card");
           const item = items.find(x => x.id === card.dataset.id);
           if (!item) return;
+          const previousRow = build28ColRows([item])[1];
           item.unit = item.unit === "KG" ? "LB" : "KG";
+          queueWorkoutEdit(item, previousRow);
           saveState();
           renderScheduleView();
         });
@@ -2212,6 +2274,7 @@
           const card = e.target.closest(".ex-card");
           const item = items.find(x => x.id === card.dataset.id);
           if (!item) return;
+          const previousRow = build28ColRows([item])[1];
           item.name = "";
           item.cues = "";
           item.basis = "總重 (含槓/機重)";
@@ -2221,6 +2284,7 @@
           item.actualSets = "";
           item.actualReps = "";
           item.status = "⬜ 待完成";
+          queueWorkoutEdit(item, previousRow);
           saveState();
           renderScheduleView();
           showToast("已清空此自訂槽");
@@ -2232,6 +2296,7 @@
           const card = e.target.closest(".ex-card");
           const item = items.find(x => x.id === card.dataset.id);
           if (!item) return;
+          const previousRow = build28ColRows([item])[1];
           item.name = "";
           item.sportMin = "";
           item.sportAvgHr = "";
@@ -2245,6 +2310,7 @@
           item.cardioSpeed = "";
           item.cardioIncline = "";
           item.status = "➖ 今日無有氧";
+          queueWorkoutEdit(item, previousRow);
           saveState();
           renderScheduleView();
           showToast("已重設本機有氧欄位，雲端已填資料會保留");
@@ -2419,6 +2485,7 @@
 
       container.querySelectorAll("[data-mdel]").forEach(btn => {
         btn.addEventListener("click", () => {
+          queueMachineEdit({ id: btn.dataset.mdel, deleted: true });
           machines = machines.filter(x => x.id !== btn.dataset.mdel);
           saveState();
           renderMachineLibrary();
@@ -2636,7 +2703,7 @@
   var machData = sheetMach ? sheetMach.getDataRange().getValues() : [];
   return ContentService.createTextOutput(JSON.stringify({
     status: "ok",
-    syncVersion: "preserve-sheet-values-v1",
+    syncVersion: "${SYNC_VERSION}",
     schedule: schedData,
     machines: machData
   })).setMimeType(ContentService.MimeType.JSON);
@@ -2655,6 +2722,8 @@ function normalizeDateCell_(val) {
 }
 
 ${classifyRowType.toString()}
+${calcStrengthMetrics.toString()}
+${calcWalkSpeed.toString()}
 
 function updateRow_(sheet, rowNumber, current, formulas, next) {
   var start = -1;
@@ -2671,7 +2740,7 @@ function updateRow_(sheet, rowNumber, current, formulas, next) {
   }
 }
 
-function syncSchedule_(sheet, rows) {
+function syncSchedule_(sheet, rows, changedColumns) {
   var lastRow = sheet.getLastRow();
   if (lastRow === 0) {
     sheet.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
@@ -2707,12 +2776,27 @@ function syncSchedule_(sheet, rows) {
     var isActivity = incomingType === "cardio" || incomingType === "sport" ||
       currentType === "cardio" || currentType === "sport";
     var columns = isActivity ? activityUpdateColumns : allUpdateColumns;
+    var selected = changedColumns ? changedColumns[i - 1] : null;
     var next = current.slice();
     columns.forEach(function(col) {
+      if (selected && ([18, 19, 22].includes(col) || !selected.includes(col))) return;
       var value = incoming[col];
       if (formulas[target][col] || value == null || (isActivity && String(value).trim() === "")) return;
       next[col] = value;
     });
+    if (selected && !isActivity) {
+      if (selected.some(function(col) { return [5, 6, 14, 15, 16, 17].includes(col); })) {
+        var metrics = calcStrengthMetrics({
+          rowType: incomingType, basis: next[5], baseKg: next[6], addedWeight: next[14],
+          unit: next[15], actualSets: next[16], actualReps: next[17]
+        });
+        next[18] = metrics.effectiveKg;
+        next[19] = metrics.volumeKg;
+      }
+      if (selected.includes(20) || selected.includes(21)) {
+        next[22] = calcWalkSpeed({ walkKm: next[20], walkMin: next[21] });
+      }
+    }
     updateRow_(sheet, target + 1, current, formulas[target], next);
     values[target] = next;
   }
@@ -2743,17 +2827,55 @@ function syncMachines_(sheet, machines) {
   }
 }
 
+function syncMachineChanges_(sheet, changes) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow === 0) {
+    syncMachines_(sheet, changes.filter(function(record) { return !record.deleted; }));
+    return;
+  }
+  var range = sheet.getRange(1, 1, lastRow, 7);
+  var values = range.getValues();
+  var formulas = range.getFormulas();
+  var byId = new Map();
+  for (var r = 1; r < values.length; r++) {
+    if (String(values[r][2] || "").trim()) {
+      byId.set(String(values[r][0] || ("mach_cloud_" + (r - 1))), r);
+    }
+  }
+  var appended = [];
+  changes.forEach(function(record) {
+    var row = byId.get(record.id);
+    if (record.deleted && row === undefined) return;
+    var next = record.deleted ? Array(7).fill("") :
+      [record.id, record.date || "", record.name, record.category || "", record.rating || 5, record.setup || "", record.notes || ""];
+    if (row === undefined) appended.push(next);
+    else updateRow_(sheet, row + 1, values[row], formulas[row], next);
+  });
+  if (appended.length > 0) sheet.getRange(lastRow + 1, 1, appended.length, 7).setValues(appended);
+}
+
 function doPost(e) {
   var payload = JSON.parse(e.postData.contents);
   var lock = LockService.getScriptLock();
   lock.waitLock(30000);
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    if (payload.schedule && payload.schedule.length > 1) {
+    if (payload.autoSyncVersion === "${SYNC_VERSION}") {
+      if (payload.scheduleChanges && payload.scheduleChanges.length > 0) {
+        var scheduleSheet = ss.getSheetByName("每日詳細訓練課表") || ss.insertSheet("每日詳細訓練課表");
+        var rows = [payload.scheduleHeader].concat(payload.scheduleChanges.map(function(edit) { return edit.row; }));
+        var columns = payload.scheduleChanges.map(function(edit) { return edit.columns; });
+        syncSchedule_(scheduleSheet, rows, columns);
+      }
+      if (payload.machineChanges && payload.machineChanges.length > 0) {
+        var machineSheet = ss.getSheetByName("器械感受收藏庫") || ss.insertSheet("器械感受收藏庫");
+        syncMachineChanges_(machineSheet, payload.machineChanges);
+      }
+    } else if (!payload.autoSyncVersion && payload.schedule && payload.schedule.length > 1) {
       var sheetSched = ss.getSheetByName("每日詳細訓練課表") || ss.insertSheet("每日詳細訓練課表");
       syncSchedule_(sheetSched, payload.schedule);
     }
-    if (payload.machines) {
+    if (!payload.autoSyncVersion && payload.machines) {
       var sheetMach = ss.getSheetByName("器械感受收藏庫") || ss.insertSheet("器械感受收藏庫");
       syncMachines_(sheetMach, payload.machines);
     }
@@ -2764,12 +2886,12 @@ function doPost(e) {
 
   return ContentService.createTextOutput(JSON.stringify({
     status: "saved",
-    syncVersion: "preserve-sheet-values-v1"
+    syncVersion: "${SYNC_VERSION}"
   }))
     .setMimeType(ContentService.MimeType.JSON);
 }`;
 
-    function build28ColRows() {
+    function build28ColRows(sourceItems = items) {
       const headers = [
         "日期", "星期", "課表模組", "階段 / 類別", "動作 / 有氧項目名稱", "計量基準",
         "空槓/機台重(kg)", "目標組數", "目標次數 / 時間", "組間休息", "建議強度 / 步速",
@@ -2778,7 +2900,7 @@ function doPost(e) {
         "散步距離 (km)", "散步時長 (分鐘)", "散步均速 (km/h)",
         "有氧距離 (km)", "有氧時長 (分鐘)", "有氧速度 (km/h)", "有氧坡度 (%)", "完成檢核"
       ];
-      const rows = items.map(it => {
+      const rows = sourceItems.map(it => {
         const m = calcStrengthMetrics(it);
         const wSpd = calcWalkSpeed(it);
         if (it.rowType === "sport" || it.rowType === "cardio") {
@@ -2822,12 +2944,19 @@ function doPost(e) {
 
     document.addEventListener("DOMContentLoaded", () => {
       loadLocalCache();
-      document.getElementById("gasCodeBlock").textContent = GAS_CODE_TEMPLATE;
       renderScheduleView();
       renderStarSelector();
       renderMachineLibrary();
 
-      syncFromCloud(true);
+      syncFromCloud();
+      window.addEventListener("online", syncFromCloud);
+      window.addEventListener("offline", syncFromCloud);
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden || hasPendingEdits()) syncFromCloud({ keepalive: document.hidden });
+      });
+      setInterval(() => {
+        if (!document.hidden) syncFromCloud();
+      }, 30000);
 
       document.querySelectorAll(".nav-tab").forEach(tab => {
         tab.addEventListener("click", () => {
@@ -2873,12 +3002,13 @@ function doPost(e) {
         if (editingMachineId) {
           const idx = machines.findIndex(x => x.id === editingMachineId);
           if (idx !== -1) {
-            machines[idx] = { ...machines[idx], name, category, setup, notes, rating: currentFormRating, photo: currentFormPhoto };
+            machines[idx] = { ...machines[idx], name, category, setup, notes, rating: currentFormRating, photo: currentFormPhoto, localOnly: false };
+            queueMachineEdit(machines[idx]);
           }
           showToast("已更新器械紀錄");
         } else {
           machines.unshift({
-            id: "mach_" + Date.now(),
+            id: "mach_" + crypto.randomUUID(),
             date: todayStr,
             name,
             category,
@@ -2887,6 +3017,7 @@ function doPost(e) {
             rating: currentFormRating,
             photo: currentFormPhoto
           });
+          queueMachineEdit(machines[0]);
           showToast("已新增至器械收藏庫");
         }
         saveState();
@@ -2916,49 +3047,6 @@ function doPost(e) {
         document.getElementById("imgModal").classList.remove("open");
       });
 
-      document.getElementById("saveGasUrlBtn").addEventListener("click", async () => {
-        const url = document.getElementById("gasUrlInput").value.trim();
-        if (!url) {
-          showToast("請輸入有效的 Google Apps Script 網址");
-          return;
-        }
-        localStorage.setItem(STORAGE_KEY_GAS, url);
-        await syncFromCloud(false);
-      });
-
-      document.getElementById("copyGasCodeBtn").addEventListener("click", () => {
-        navigator.clipboard.writeText(GAS_CODE_TEMPLATE).then(() => {
-          showToast("已複製 Apps Script 程式碼");
-        });
-      });
-
-      document.getElementById("pushCloudBtn").addEventListener("click", async () => {
-        const url = getGasUrl();
-        const statusEl = document.getElementById("syncStatusMsg");
-        statusEl.textContent = "⏳ 正在上傳局部更新至 Google 試算表...";
-        try {
-          const rows28 = build28ColRows();
-          const payload = {
-            schedule: rows28,
-            machines: machines.map(({ photo, ...rest }) => rest)
-          };
-          await fetch(url, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(payload)
-          });
-          statusEl.textContent = `✅ 已發送同步請求（共 ${rows28.length - 1} 筆課表列），舊週歷史紀錄安全保留。`;
-          showToast("雲端同步請求已發送");
-        } catch (err) {
-          statusEl.textContent = "❌ 同步失敗：" + err.message;
-        }
-      });
-
-      document.getElementById("pullCloudBtn").addEventListener("click", () => {
-        syncFromCloud(false);
-      });
-
       document.getElementById("exportCsvBtn").addEventListener("click", () => {
         const rows = build28ColRows();
         const csvText = "\uFEFF" + rows.map(r => r.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
@@ -2970,28 +3058,49 @@ function doPost(e) {
       });
 
       document.getElementById("exportJsonBtn").addEventListener("click", () => {
-        const backup = { version: "dynamic_v3", exportedAt: new Date().toISOString(), items, machines };
+        downloadBackup(items, "workout_tracker");
+      });
+      const preSyncBtn = document.getElementById("exportPreSyncBtn");
+      const preSyncItems = localStorage.getItem(STORAGE_KEY_PRE_SYNC_ITEMS);
+      preSyncBtn.hidden = !preSyncItems;
+      preSyncBtn.addEventListener("click", () => {
+        downloadBackup(JSON.parse(preSyncItems), "workout_before_auto_sync");
+      });
+
+      function downloadBackup(backupItems, filename) {
+        const backup = { version: "dynamic_v3", exportedAt: new Date().toISOString(), items: backupItems, machines };
         const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `workout_tracker_backup_${getTodayDateStr().replace(/\//g, "")}.json`;
+        a.download = `${filename}_backup_${getTodayDateStr().replace(/\//g, "")}.json`;
         a.click();
-      });
+      }
 
       document.getElementById("importJsonInput").addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        e.target.value = "";
         const reader = new FileReader();
         reader.onload = (ev) => {
           try {
             const parsed = JSON.parse(ev.target.result);
+            if (!Array.isArray(parsed.items) && !Array.isArray(parsed.machines)) throw new Error("Invalid workout backup");
+            if (!confirm("還原的資料會自動同步至 Google 試算表，並更新相同的紀錄。確定要還原嗎？")) return;
             if (Array.isArray(parsed.items)) {
+              const previousRows = new Map(build28ColRows().slice(1).map(row => [scheduleKey(row), row]));
               items = parsed.items.map(it => ({
                 ...it,
                 rowType: classifyRowType(it.phase, it.basis)
               }));
+              items.forEach(item => {
+                const row = build28ColRows([item])[1];
+                queueWorkoutEdit(item, previousRows.get(scheduleKey(row)));
+              });
             }
-            if (Array.isArray(parsed.machines)) machines = parsed.machines;
+            if (Array.isArray(parsed.machines)) {
+              machines = parsed.machines;
+              machines.forEach(queueMachineEdit);
+            }
             pickBestDateAndWeek(false);
             saveState();
             renderScheduleView();
@@ -3004,13 +3113,6 @@ function doPost(e) {
         reader.readAsText(file);
       });
 
-      document.getElementById("clearCacheBtn").addEventListener("click", async () => {
-        if (!confirm("確定要清除本機快取並重新從 Google 試算表載入最新資料嗎？")) return;
-        localStorage.removeItem(STORAGE_KEY_ITEMS);
-        items = [];
-        selectedDate = "";
-        await syncFromCloud(false);
-      });
     });
   </script>
 </body>
