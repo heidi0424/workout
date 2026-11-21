@@ -1237,7 +1237,7 @@
       const p = String(phaseStr || "").trim();
       const b = String(basisStr || "").trim();
       if (p.includes("午間散步") || b.includes("步行紀錄")) return "walk";
-      if (p.includes("專項有氧") || b.includes("有氧紀錄")) return "cardio";
+      if (p.includes("專項有氧") || p.includes("有氧活動") || b.includes("有氧紀錄")) return "cardio";
       if (p.includes("COROS") || b.includes("COROS")) return "sport";
       if (p.includes("自訂加練")) return "custom";
       return "strength";
@@ -1730,7 +1730,7 @@
         if (st.cardioMin > 0) cParts.push(`${st.cardioMin} 分`);
         if (st.cardioSpeed > 0) cParts.push(`均速 ${st.cardioSpeed}`);
         if (st.cardioIncline > 0) cParts.push(`坡度 ${st.cardioIncline}%`);
-        track3Text = cParts.length > 0 ? cParts.join("｜") : "已完成有氧訓練";
+        track3Text = cParts.length > 0 ? cParts.join("｜") : "已完成有氧活動";
       }
 
       box.innerHTML = `
@@ -2074,13 +2074,14 @@
       }
 
       if (cardioItems.length > 0) {
-        html += `<div class="track-section-hdr cardio-hdr"><span>🏃 軌道三｜專項有氧與身心課程（選填 1–3・COROS 模式）</span><span>可自由下拉選擇項目・未做不扣分</span></div>`;
+        html += `<div class="track-section-hdr cardio-hdr"><span>🏃 軌道三｜有氧活動（選填 1–3・COROS 模式）</span><span>可自由下拉選擇項目・未做不扣分</span></div>`;
         cardioItems.forEach((it, idx) => {
           const isDone = it.status === "✅ 已完成";
           const currentName = String(it.name || "").trim();
           const hasCustomName = currentName !== "" && !CARDIO_OPTIONS.includes(currentName);
+          const displayBadge = String(it.phase || ("有氧活動 (選填) " + (idx + 1))).replace("專項有氧", "有氧活動");
           const optionsHtml = [
-            `<option value="" ${currentName === "" ? "selected" : ""}>— 請選擇有氧 / 課程項目（留白不計分）—</option>`,
+            `<option value="" ${currentName === "" ? "selected" : ""}>— 請選擇有氧活動（留白不計分）—</option>`,
             ...CARDIO_OPTIONS.map(opt => `<option value="${escapeHtml(opt)}" ${currentName === opt ? "selected" : ""}>${escapeHtml(opt)}</option>`),
             ...(hasCustomName ? [`<option value="${escapeHtml(currentName)}" selected>${escapeHtml(currentName)}</option>`] : [])
           ].join("");
@@ -2089,7 +2090,7 @@
             <div class="ex-card cardio-card ${isDone ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
               <div class="card-top-row">
                 <div style="flex:1;">
-                  <span class="phase-badge cardio">${it.phase || ("專項有氧 (選填) " + (idx + 1))}</span>${isDone ? '<span class="lock-badge">🔒 已鎖定</span>' : ""}
+                  <span class="phase-badge cardio">${displayBadge}</span>${isDone ? '<span class="lock-badge">🔒 已鎖定</span>' : ""}
                   <select class="ctrl-select" data-field="name" style="margin-top:4px; font-weight:700;" ${isDone ? "disabled" : ""}>
                     ${optionsHtml}
                   </select>
