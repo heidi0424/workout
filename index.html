@@ -1193,8 +1193,6 @@
     let editingMachineId = null;
     let currentFormRating = 5;
     let currentFormPhoto = "";
-    let showAllCustomSlots = false;
-    let showAllCardioSlots = false;
 
     function getDynamicCardioOptions() {
       const set = new Set(DEFAULT_CARDIO_OPTIONS);
@@ -1665,8 +1663,6 @@
           if (w && !w.days.some(d => d.date === selectedDate)) {
             selectedDate = w.days[0].date;
           }
-          showAllCustomSlots = false;
-          showAllCardioSlots = false;
           onWeekChange();
         });
       });
@@ -1675,8 +1671,6 @@
       if (todayBtn) {
         todayBtn.addEventListener("click", () => {
           pickBestDateAndWeek(false);
-          showAllCustomSlots = false;
-          showAllCardioSlots = false;
           onWeekChange();
         });
       }
@@ -1708,8 +1702,6 @@
       strip.querySelectorAll(".day-pill").forEach(el => {
         el.addEventListener("click", () => {
           selectedDate = el.dataset.date;
-          showAllCustomSlots = false;
-          showAllCardioSlots = false;
           renderScheduleView();
         });
       });
@@ -1907,15 +1899,9 @@
         });
       }
 
-      // 2. 重訓課表（含熱身、主課表與自訂加練 / 替代動作）
+      // 2. 重訓課表（含熱身與自訂替代動作，全部直接展開）
       if (strengthItems.length > 0 || customItems.length > 0) {
-        const filledCustomCount = customItems.filter(c => String(c.name || "").trim() !== "" || c.status === "✅ 已完成").length;
-        const hiddenCustomCount = customItems.length - Math.max(1, filledCustomCount);
-        const toggleCustomBtn = customItems.length > 1 && hiddenCustomCount > 0
-          ? `<button type="button" class="btn btn-outline btn-sm" id="toggleCustomBtn">${showAllCustomSlots ? "收合空白備用格" : `＋ 展開全部備用格（另有 ${hiddenCustomCount} 格）`}</button>`
-          : "";
-
-        html += `<div class="section-hdr strength-hdr"><span>🏋️ 2. 重訓課表（含熱身與自訂替代動作）</span>${toggleCustomBtn}</div>`;
+        html += `<div class="section-hdr strength-hdr"><span>🏋️ 2. 重訓課表（含熱身與自訂替代動作）</span><span>自動對照上次紀錄</span></div>`;
 
         strengthItems.forEach(it => {
           const isDone = it.status === "✅ 已完成";
@@ -1990,9 +1976,6 @@
         });
 
         customItems.forEach((it, idx) => {
-          const isFilled = String(it.name || "").trim() !== "" || it.status === "✅ 已完成";
-          if (!showAllCustomSlots && !isFilled && idx > 0) return;
-
           const isDone = it.status === "✅ 已完成";
           const m = calcStrengthMetrics(it);
           const isBodyweight = it.basis === "自重 / 彈力帶";
@@ -2058,15 +2041,9 @@
         });
       }
 
-      // 3. 有氧與專項運動（合併原專項課程與有氧活動 1–3，統一 COROS 數據模式）
+      // 3. 有氧活動與專項運動（全部直接展開，統一 COROS 數據模式）
       if (sportItems.length > 0 || cardioItems.length > 0) {
-        const filledCardioCount = cardioItems.filter(c => String(c.name || "").trim() !== "" || c.status !== "➖ 今日無有氧").length;
-        const hiddenCardioCount = cardioItems.length - Math.max(1, filledCardioCount);
-        const toggleCardioBtn = cardioItems.length > 1 && hiddenCardioCount > 0
-          ? `<button type="button" class="btn btn-outline btn-sm" id="toggleCardioBtn">${showAllCardioSlots ? "收合空白有氧格" : `＋ 展開全部有氧格（另有 ${hiddenCardioCount} 格）`}</button>`
-          : "";
-
-        html += `<div class="section-hdr cardio-hdr"><span>⌚ 3. 有氧活動與專項運動（COROS 數據）</span>${toggleCardioBtn}</div>`;
+        html += `<div class="section-hdr cardio-hdr"><span>⌚ 3. 有氧活動與專項運動（COROS 數據）</span><span>未做不扣分・可複選多項</span></div>`;
 
         sportItems.forEach(it => {
           const isDone = it.status === "✅ 已完成";
@@ -2099,9 +2076,6 @@
 
         const dynamicOptions = getDynamicCardioOptions();
         cardioItems.forEach((it, idx) => {
-          const isFilled = String(it.name || "").trim() !== "" || it.status !== "➖ 今日無有氧";
-          if (!showAllCardioSlots && !isFilled && idx > 0) return;
-
           const isDone = it.status === "✅ 已完成";
           const currentName = String(it.name || "").trim();
           const optionsHtml = [
@@ -2144,22 +2118,6 @@
 
     function bindScheduleEvents() {
       const container = document.getElementById("scheduleContainer");
-
-      const toggleCustomBtn = document.getElementById("toggleCustomBtn");
-      if (toggleCustomBtn) {
-        toggleCustomBtn.addEventListener("click", () => {
-          showAllCustomSlots = !showAllCustomSlots;
-          renderScheduleView();
-        });
-      }
-
-      const toggleCardioBtn = document.getElementById("toggleCardioBtn");
-      if (toggleCardioBtn) {
-        toggleCardioBtn.addEventListener("click", () => {
-          showAllCardioSlots = !showAllCardioSlots;
-          renderScheduleView();
-        });
-      }
 
       container.querySelectorAll("[data-field]").forEach(el => {
         const handler = (e) => {
