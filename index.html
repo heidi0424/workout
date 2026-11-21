@@ -366,14 +366,39 @@
       transition: border-color 0.15s ease;
     }
 
+    .ex-card.walk-card {
+      background: #fafdff;
+      border-color: var(--sky-200);
+    }
+
+    .ex-card.sport-card {
+      background: #fffcf7;
+      border-color: var(--orange-200);
+    }
+
+    .ex-card.cardio-card {
+      background: #fff9fa;
+      border-color: var(--rose-200);
+    }
+
+    .ex-card.custom-card {
+      background: #fcfaff;
+      border-color: var(--violet-200);
+    }
+
+    .ex-card.status-skip {
+      border-left: 5px solid #d97706;
+      opacity: 0.85;
+    }
+
     .ex-card.status-done,
     .ex-card.walk-card.status-done,
     .ex-card.sport-card.status-done,
     .ex-card.cardio-card.status-done,
     .ex-card.custom-card.status-done {
-      background: #e5e7eb;
-      border-color: #cbd5e1;
-      border-left: 5px solid var(--teal-600);
+      background: #e5e7eb !important;
+      border-color: #cbd5e1 !important;
+      border-left: 5px solid var(--teal-600) !important;
       opacity: 0.84;
     }
 
@@ -392,14 +417,24 @@
       color: #64748b;
     }
 
-    .ex-card.status-done .calc-strip {
-      background: #cbd5e1;
-      border-color: #94a3b8;
-      color: #334155;
+    .ex-card.status-done .calc-strip,
+    .ex-card.walk-card.status-done .calc-strip,
+    .ex-card.sport-card.status-done .calc-strip,
+    .ex-card.cardio-card.status-done .calc-strip {
+      background: #cbd5e1 !important;
+      border-color: #94a3b8 !important;
+      color: #334155 !important;
     }
 
     .ex-card.status-done .ctrl-input:disabled,
     .ex-card.status-done .ctrl-select:disabled,
+    .ex-card.walk-card.status-done .ctrl-input:disabled,
+    .ex-card.sport-card.status-done .ctrl-input:disabled,
+    .ex-card.sport-card.status-done .ctrl-select:disabled,
+    .ex-card.cardio-card.status-done .ctrl-input:disabled,
+    .ex-card.cardio-card.status-done .ctrl-select:disabled,
+    .ex-card.custom-card.status-done .ctrl-input:disabled,
+    .ex-card.custom-card.status-done .ctrl-select:disabled,
     .ex-card.status-done .unit-btn:disabled,
     .ex-card.status-done .preset-pill:disabled,
     .ex-card.status-done .btn:disabled {
@@ -437,31 +472,6 @@
       margin-bottom: 8px;
       font-size: 0.78rem;
       font-weight: 700;
-    }
-
-    .ex-card.status-skip {
-      border-left: 5px solid #d97706;
-      opacity: 0.85;
-    }
-
-    .ex-card.walk-card {
-      background: #fafdff;
-      border-color: var(--sky-200);
-    }
-
-    .ex-card.sport-card {
-      background: #fffcf7;
-      border-color: var(--orange-200);
-    }
-
-    .ex-card.cardio-card {
-      background: #fff9fa;
-      border-color: var(--rose-200);
-    }
-
-    .ex-card.custom-card {
-      background: #fcfaff;
-      border-color: var(--violet-200);
     }
 
     .card-top-row {
@@ -1176,6 +1186,7 @@
     const DEFAULT_CARDIO_OPTIONS = [
       "跑步機爬坡 / 跑步 / 有氧",
       "跑步機坡度慢跑（HYROX 疲勞轉換跑）",
+      "跑步機坡度慢跑（HARCO 緩和收尾）",
       "皮拉提斯",
       "瑜珈",
       "樂活極球",
@@ -1250,6 +1261,7 @@
       if (m.includes("腿日")) return "腿日";
       if (m.includes("羽球")) return "羽球";
       if (m.includes("Zone 2") || m.includes("有氧")) return "有氧";
+      if (m.includes("HARCO")) return "HARCO";
       if (m.includes("HYROX")) return "HYROX";
       if (m.includes("主動恢復")) return "修復";
       if (m.includes("動態恢復") || m.includes("休息")) return "恢復";
@@ -2043,7 +2055,7 @@
 
       // 3. 有氧活動與專項運動（全部直接展開，統一 COROS 數據模式）
       if (sportItems.length > 0 || cardioItems.length > 0) {
-        html += `<div class="section-hdr cardio-hdr"><span>⌚ 3. 有氧活動與專項運動（COROS 數據）</span><span>未做不扣分・可複選多項</span></div>`;
+        html += `<div class="section-hdr cardio-hdr"><span>⌚ 3. 有氧活動與專項運動（COROS 數據）</span><span>未做不扣分・填完再選已完成</span></div>`;
 
         sportItems.forEach(it => {
           const isDone = it.status === "✅ 已完成";
@@ -2140,22 +2152,10 @@
 
           item[field] = newVal;
 
-          if (item.rowType === "cardio") {
-            if (field === "name" && String(item.name || "").trim() !== "" && item.status === "➖ 今日無有氧") {
+          // 選了項目名稱後，若原本為「➖ 今日無有氧」則自動切換為「⬜ 待完成」（不自動完成鎖定）
+          if (item.rowType === "cardio" && field === "name") {
+            if (String(item.name || "").trim() !== "" && item.status === "➖ 今日無有氧") {
               item.status = "⬜ 待完成";
-            }
-            if (["sportMin", "sportAvgHr", "sportKcal", "sportLoad", "sportAerobicTe", "sportAnaerobicTe"].includes(field)) {
-              const hasAny = (parseFloat(item.sportMin) || 0) > 0 || (parseFloat(item.sportAvgHr) || 0) > 0 || (parseFloat(item.sportKcal) || 0) > 0 || (parseFloat(item.sportLoad) || 0) > 0;
-              if (hasAny && (item.status === "➖ 今日無有氧" || item.status === "⬜ 待完成")) {
-                item.status = "✅ 已完成";
-              }
-            }
-          }
-
-          if (item.rowType === "sport" && ["sportMin", "sportAvgHr", "sportKcal", "sportLoad", "sportAerobicTe", "sportAnaerobicTe"].includes(field)) {
-            const hasAny = (parseFloat(item.sportMin) || 0) > 0 || (parseFloat(item.sportAvgHr) || 0) > 0 || (parseFloat(item.sportKcal) || 0) > 0 || (parseFloat(item.sportLoad) || 0) > 0;
-            if (hasAny && item.status === "⬜ 待完成") {
-              item.status = "✅ 已完成";
             }
           }
 
@@ -2267,11 +2267,6 @@
         const strip = card.querySelector(".calc-strip");
         if (strip) {
           strip.innerHTML = `<span>${minVal} 分｜均心率 ${hrVal || "-"} bpm｜${kcalVal || "-"} kcal</span><span>負荷 ${loadVal || "-"}｜有氧 ${aeroVal} / 無氧 ${anaeroVal}</span>`;
-        }
-        const statusSel = card.querySelector('[data-field="status"]');
-        if (statusSel && statusSel.value !== item.status) {
-          statusSel.value = item.status;
-          statusSel.className = "status-select " + statusClass(item.status);
         }
       } else {
         const m = calcStrengthMetrics(item);
