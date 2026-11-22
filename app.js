@@ -664,6 +664,24 @@
       return Math.round((km / (min / 60)) * 100) / 100;
     }
 
+    function walkSpeedWarning(item, speed) {
+      const limit = Number(String(item.rpe ?? "").match(/(?:≤|不超過)\s*(\d+(?:\.\d+)?)\s*km\/h/i)?.[1]);
+      return speed > limit ? `⚠️ 建議步速不超過 ${limit} km/h，目前是 ${speed} km/h。` : "";
+    }
+
+    function strengthMeasurement(item) {
+      if (item.basis !== "時間 / 距離") return null;
+      const metric = String(item.targetReps ?? "").trim().match(/^(\d+(?:\.\d+)?)\s*(公尺|公里|km|m|秒|分鐘)$/);
+      if (!metric) return null;
+      const [, amount, unit] = metric;
+      const displayUnit = unit === "m" ? "公尺" : unit === "km" ? "公里" : unit;
+      return {
+        amount,
+        label: `實際${unit === "秒" || unit === "分鐘" ? "時間" : "距離"} (每組${displayUnit})`,
+        step: displayUnit === "公里" || amount.includes(".") ? 0.01 : 1
+      };
+    }
+
     function findPreviousCompletedRecord(currentItem) {
       const targetName = String(currentItem.name || "").trim();
       if (!targetName) return null;
@@ -711,7 +729,7 @@
         }
         if (it.rowType === "cardio") {
           cardioKm += parseFloat(it.cardioKm) || 0;
-          cardioMin += parseFloat(it.cardioMin) || 0;
+          if (!String(it.sportMin ?? "").trim()) cardioMin += parseFloat(it.cardioMin) || 0;
           cardioSpeed = parseFloat(it.cardioSpeed) || 0;
           cardioIncline = parseFloat(it.cardioIncline) || 0;
           sportMin += parseFloat(it.sportMin) || 0;
@@ -984,10 +1002,7 @@
         walkItems.forEach(it => {
           const isDone = it.status === "✅ 已完成";
           const speed = calcWalkSpeed(it);
-          const isSlowDay = it.weekday === "週三";
-          const speedWarn = isSlowDay && speed > 4.5
-            ? `<div class="warn-banner">⚠️ 今日建議控速 ≤ 4.5 km/h（目前 ${speed} km/h），請放慢步速以利腿後肌群修復。</div>`
-            : "";
+          const speedWarn = walkSpeedWarning(it, speed);
           html += `
             <div class="ex-card walk-card ${isDone ? "status-done" : it.status === "⏭️ 略過/調整" ? "status-skip" : ""}" data-id="${it.id}">
               <div class="card-top-row">
@@ -1020,7 +1035,7 @@
                 <span>自動換算平均時速</span>
                 <span>${speed} km/h</span>
               </div>
-              ${speedWarn}
+              <div class="warn-banner" data-walk-warning ${speedWarn ? "" : "hidden"}>${speedWarn}</div>
             </div>
           `;
         });
@@ -1034,6 +1049,7 @@
           const isDone = it.status === "✅ 已完成";
           const m = calcStrengthMetrics(it);
           const isBodyweight = it.basis === "自重 / 彈力帶" || it.basis === "時間 / 距離";
+          const measurement = strengthMeasurement(it);
           const ytHtml = it.video
             ? `<a href="${it.video}" target="_blank" rel="noopener noreferrer" class="yt-btn">▶ 觀看動作示範短片</a>`
             : "";
@@ -1090,11 +1106,11 @@
                   <input type="number" step="1" min="0" class="ctrl-input" data-field="actualSets" value="${it.actualSets}" placeholder="${it.targetSets || 3}" ${isDone ? "disabled" : ""} />
                 </div>
                 <div class="field-group">
-                  <label>實際次數 (單組)</label>
-                  <input type="number" step="1" min="0" class="ctrl-input" data-field="actualReps" value="${it.actualReps}" placeholder="10" ${isDone ? "disabled" : ""} />
+                  <label>${measurement?.label || "實際次數 (單組)"}</label>
+                  <input type="number" step="${measurement?.step || 1}" min="0" class="ctrl-input" data-field="actualReps" value="${it.actualReps}" placeholder="${measurement?.amount || 10}" ${isDone ? "disabled" : ""} />
                 </div>
               </div>
-              <div class="calc-strip">
+              <div class="calc-strip" ${measurement ? 'style="display:none;"' : ""}>
                 <span>單組有效總重：${m.effectiveKg} kg</span>
                 <span>總訓練容量 Volume：${m.volumeKg.toLocaleString()} kg</span>
               </div>
@@ -1382,6 +1398,11 @@
         const speed = calcWalkSpeed(item);
         const strip = card.querySelector(".calc-strip");
         if (strip) strip.innerHTML = `<span>自動換算平均時速</span><span>${speed} km/h</span>`;
+        const warning = card.querySelector("[data-walk-warning]");
+        if (warning) {
+          warning.textContent = walkSpeedWarning(item, speed);
+          warning.hidden = !warning.textContent;
+        }
       } else if (item.rowType === "sport" || item.rowType === "cardio") {
         const minVal = parseFloat(item.sportMin) || 0;
         const hrVal = parseFloat(item.sportAvgHr) || 0;
@@ -1853,11 +1874,12 @@ function syncSchedule_(sheet, rows, changedColumns) {
           rowType: incomingType, basis: next[5], baseKg: next[6], addedWeight: next[14],
           unit: next[15], actualSets: next[16], actualReps: next[17]
         });
-        next[18] = metrics.effectiveKg;
-        next[19] = metrics.volumeKg;
+        if (metrics.effectiveKg !== 0 || current[18] !== "") next[18] = metrics.effectiveKg;
+        if (metrics.volumeKg !== 0 || current[19] !== "") next[19] = metrics.volumeKg;
       }
       if (selected.includes(20) || selected.includes(21)) {
-        next[22] = calcWalkSpeed({ walkKm: next[20], walkMin: next[21] });
+        var speed = calcWalkSpeed({ walkKm: next[20], walkMin: next[21] });
+        if (speed !== 0 || current[22] !== "") next[22] = speed;
       }
     }
     updateRow_(sheet, target + 1, current, formulas[target], next);
