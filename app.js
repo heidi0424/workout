@@ -41,6 +41,14 @@
     let syncTimer;
     let syncRunning = false;
 
+    function getExerciseVideo(item) {
+      const video = String(item.video || "").trim();
+      const oldVideo = /^https?:\/\/(?:(?:www\.)?youtube\.com\/watch\?v=4I2zlJyljHU(?:[&#].*)?|youtu\.be\/4I2zlJyljHU(?:[?#].*)?)$/i;
+      return String(item.name || "").trim() === "靠牆單臂胸大肌伸展" && oldVideo.test(video)
+        ? "https://www.youtube.com/watch?v=hfU0EDpFwDw"
+        : video;
+    }
+
     function getDynamicCardioOptions() {
       const set = new Set(DEFAULT_CARDIO_OPTIONS);
       items.forEach(it => {
@@ -1050,8 +1058,9 @@
           const m = calcStrengthMetrics(it);
           const isBodyweight = it.basis === "自重 / 彈力帶" || it.basis === "時間 / 距離";
           const measurement = strengthMeasurement(it);
-          const ytHtml = it.video
-            ? `<a href="${it.video}" target="_blank" rel="noopener noreferrer" class="yt-btn">▶ 觀看動作示範短片</a>`
+          const video = getExerciseVideo(it);
+          const ytHtml = video
+            ? `<a href="${video}" target="_blank" rel="noopener noreferrer" class="yt-btn">▶ 觀看動作示範短片</a>`
             : "";
           const prevHtml = buildPrevRecordHtml(it, isDone);
 
@@ -1190,8 +1199,9 @@
 
         sportItems.forEach(it => {
           const isDone = it.status === "✅ 已完成";
-          const ytHtml = it.video
-            ? `<a href="${it.video}" target="_blank" rel="noopener noreferrer" class="yt-btn">▶ 觀看動作與熱身參考</a>`
+          const video = getExerciseVideo(it);
+          const ytHtml = video
+            ? `<a href="${video}" target="_blank" rel="noopener noreferrer" class="yt-btn">▶ 觀看動作與熱身參考</a>`
             : "";
 
           html += `
@@ -2034,7 +2044,7 @@ function doPost(e) {
           return [
             it.date, it.weekday, it.module, it.phase, it.name, it.basis || "COROS 生理數據",
             it.baseKg ?? 0, it.targetSets || 0, it.targetReps || "依 COROS 運動時間紀錄", it.rest || "-", it.rpe || "COROS 概要數據",
-            combinedNotes, it.muscles, it.video, it.addedWeight ?? "", it.unit ?? "",
+            combinedNotes, it.muscles, getExerciseVideo(it), it.addedWeight ?? "", it.unit ?? "",
             it.actualSets ?? "", it.actualReps ?? "", m.effectiveKg, m.volumeKg,
             it.walkKm ?? "", it.walkMin ?? "", wSpd,
             it.cardioKm ?? "", String(it.sportMin ?? "").trim() || it.cardioMin || "",
@@ -2044,7 +2054,7 @@ function doPost(e) {
         return [
           it.date, it.weekday, it.module, it.phase, it.name, it.basis,
           it.baseKg, it.targetSets, it.targetReps, it.rest, it.rpe,
-          it.cues, it.muscles, it.video, it.addedWeight, it.unit,
+          it.cues, it.muscles, getExerciseVideo(it), it.addedWeight, it.unit,
           it.actualSets, it.actualReps, m.effectiveKg, m.volumeKg,
           it.walkKm, it.walkMin, wSpd,
           it.cardioKm, it.cardioMin, it.cardioSpeed, it.cardioIncline, it.status
