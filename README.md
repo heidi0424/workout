@@ -4,26 +4,20 @@ GitHub 專案：https://github.com/heidi0424/workout
 
 ## 公司與家裡怎麼接著做
 
-GitHub 存放大家共用的最新程式碼。這台電腦的專案資料夾是 `D:\HeidiSite\workout`。`D:\HeidiSite` 是放置各專案的上層資料夾。
+GitHub 存放兩台電腦共用的程式碼和交接文件。公司和家裡都已將專案放在 `D:\HeidiSite\workout`。
 
-### 這台電腦
+### 設定 Codex 專案資料夾
 
-在 Codex 新增或開啟專案，選取 `D:\HeidiSite\workout`。之後在這個專案的聊天中提出修改需求。
+在 Codex 新增本機專案，選取 `D:\HeidiSite\workout`。如果已經有 workout 專案，開啟專案選單的「編輯專案」，將該資料夾設為主要資料夾。之後在 workout 專案中開始工作。
 
-### 家裡電腦第一次使用
-
-1. 安裝 Git 和 Codex，並登入你的帳號。
-2. 建立一個放專案的上層資料夾，例如 `D:\HeidiSite`；若沒有 D 槽，可用 `C:\HeidiSite`。
-3. 在 Codex 新增專案並選取該資料夾。
-4. 對 Codex 說：「請將 https://github.com/heidi0424/workout 複製到目前資料夾下一層的 workout 資料夾。若已有檔案，先檢查，不要覆蓋。下載後請讀取 workout 裡的 AGENTS.md 和 PROGRESS.md。」之後將 Codex 專案資料夾選為 `D:\HeidiSite\workout`（或實際使用的路徑）。
-5. 第一次上傳時如果需要 GitHub 登入，依提示登入有寫入此專案權限的 GitHub 帳號。
+如果要在另一台電腦安裝，先檢查是否已經有 workout 檔案。空白路徑可從 GitHub 複製到空資料夾，再將該資料夾加入 Codex。沒有 D 槽時可使用 `C:\HeidiSite\workout`。
 
 ### 每次只要記得兩句話
 
 - 開始前：「開始工作，先更新並讀取進度。」
 - 結束前：「收工同步，更新進度並上傳 GitHub，確認上傳成功。」
 
-請等上一台電腦上傳成功，再到另一台開始修改，避免兩邊改到同一個檔案。
+開始修改前，Codex 會先檢查本機尚未上傳的內容，再取得並整合 GitHub 最新版本、讀取進度。請等上一台電腦上傳成功，再到另一台開始修改。
 
 ### 家裡已經有修改時
 
